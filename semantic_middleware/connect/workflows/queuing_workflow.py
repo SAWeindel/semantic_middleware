@@ -4,7 +4,8 @@ import anyio
 import anyio.to_thread
 
 
-from aas_middleware.connect.workflows.workflow import Workflow, typechecked_partial
+from semantic_middleware.connect.workflows.workflow import Workflow, typechecked_partial
+
 
 class QueueingWorkflow(Workflow):
     """
@@ -17,6 +18,7 @@ class QueueingWorkflow(Workflow):
         on_shutdown (bool, optional): If True, the workflow function is executed on shutdown. Defaults to False.
         pool_size (int, optional): The number of concurrently running workflows. Defaults to 1.
     """
+
     def __init__(
         self,
         workflow_function: Union[Awaitable[None], Callable[..., None]],
@@ -26,7 +28,9 @@ class QueueingWorkflow(Workflow):
         capability: Optional[str] = None,
         pool_size: int = 1,
     ):
-        super().__init__(workflow_function, interval, on_startup, on_shutdown, capability)
+        super().__init__(
+            workflow_function, interval, on_startup, on_shutdown, capability
+        )
         self.pool_size = pool_size
         self.semaphore = anyio.Semaphore(pool_size)
 
@@ -49,7 +53,7 @@ class QueueingWorkflow(Workflow):
             on_shutdown=on_shutdown,
             interval=interval,
             pool_size=pool_size,
-            capability=capability
+            capability=capability,
         )
 
     async def _run_workflow_function(self, *args, **kwargs) -> Awaitable[Any]:

@@ -8,7 +8,11 @@ import typing
 
 from pydantic.fields import FieldInfo
 from aas_pydantic import aas_model
-from aas_middleware.model.util import convert_under_score_to_camel_case_str, is_identifiable_type, is_identifiable_type_container
+from semantic_middleware.model.util import (
+    convert_under_score_to_camel_case_str,
+    is_identifiable_type,
+    is_identifiable_type_container,
+)
 
 
 def save_model_list_with_schema(model_list: typing.List[BaseModel], path: str):
@@ -40,10 +44,13 @@ def get_contained_models_attribute_info(
     submodels = []
     for attribute_name, fieldinfo in model.model_fields.items():
         if typing.get_args(fieldinfo.annotation) != () and all(
-            is_identifiable_type(arg) or is_identifiable_type_container(arg) for arg in typing.get_args(fieldinfo.annotation)
+            is_identifiable_type(arg) or is_identifiable_type_container(arg)
+            for arg in typing.get_args(fieldinfo.annotation)
         ):
             submodels.append((attribute_name, fieldinfo.annotation))
-        elif is_identifiable_type(fieldinfo.annotation) or is_identifiable_type_container(fieldinfo.annotation):
+        elif is_identifiable_type(
+            fieldinfo.annotation
+        ) or is_identifiable_type_container(fieldinfo.annotation):
             submodels.append((attribute_name, fieldinfo.annotation))
     return submodels
 

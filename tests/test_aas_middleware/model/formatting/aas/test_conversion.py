@@ -11,7 +11,7 @@ from aas_pydantic import (
     convert_pydantic_model,
     convert_pydantic_type,
 )
-from aas_middleware.model.formatting.util import compare_schemas
+from semantic_middleware.model.formatting.util import compare_schemas
 
 
 def test_convert_simple_submodel(example_submodel: Submodel):

@@ -1,3 +1,3 @@
 # Model API
 
-::: aas_middleware.model
+::: semantic_middleware.model

@@ -1,25 +1,27 @@
 import json
 import typing
 import uvicorn
-import aas_middleware
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxTemplateFormatter
+import semantic_middleware
+from semantic_middleware.model.formatting.aas.basyx_formatter import (
+    BasyxTemplateFormatter,
+)
 
 
-class BillOfMaterialInfo(aas_middleware.SubmodelElementCollection):
+class BillOfMaterialInfo(semantic_middleware.SubmodelElementCollection):
     manufacterer: str
     product_type: str
 
 
-class BillOfMaterial(aas_middleware.Submodel):
+class BillOfMaterial(semantic_middleware.Submodel):
     components: typing.List[str]
     bill_of_material_info: BillOfMaterialInfo
 
 
-class ProcessModel(aas_middleware.Submodel):
+class ProcessModel(semantic_middleware.Submodel):
     processes: typing.List[str]
 
 
-class Product(aas_middleware.AAS):
+class Product(semantic_middleware.AAS):
     bill_of_material: BillOfMaterial
     process_model: typing.Optional[ProcessModel]
 
@@ -45,30 +47,41 @@ example_product = Product(
         id="example_process_model_id",
         id_short="example_process_model_id",
         description="Example Process Model",
-        processes=["process_1", "process_2"]
+        processes=["process_1", "process_2"],
     ),
 )
 
-data_model = aas_middleware.DataModel.from_models(example_product)
-basyx_object_store = aas_middleware.formatting.BasyxFormatter().serialize(data_model)
+data_model = semantic_middleware.DataModel.from_models(example_product)
+basyx_object_store = semantic_middleware.formatting.BasyxFormatter().serialize(
+    data_model
+)
 
-formatter = aas_middleware.formatting.AasJsonFormatter()
-json_aas = formatter.serialize(data_model)  
+formatter = semantic_middleware.formatting.AasJsonFormatter()
+json_aas = formatter.serialize(data_model)
 # with open("example_aas.json", "w") as f:
 #     f.write(json.dumps(json_aas, indent=4))
 
 
-infered_data_model_with_templates = BasyxTemplateFormatter().deserialize(basyx_object_store)
+infered_data_model_with_templates = BasyxTemplateFormatter().deserialize(
+    basyx_object_store
+)
 types = list(infered_data_model_with_templates._schemas.values())
-reformatted_data_model = aas_middleware.formatting.AasJsonFormatter().deserialize(
+reformatted_data_model = semantic_middleware.formatting.AasJsonFormatter().deserialize(
     json_aas, types
 )
 print(reformatted_data_model.get_model("example_product_id"))
 
 
-middleware = aas_middleware.AasMiddleware()
+middleware = semantic_middleware.AasMiddleware()
 middleware.load_aas_persistent_data_model(
-    "example", data_model, "localhost", 8081, "localhost", 8081, persist_instances=True, caching=True
+    "example",
+    data_model,
+    "localhost",
+    8081,
+    "localhost",
+    8081,
+    persist_instances=True,
+    caching=True,
 )
 
 middleware.generate_rest_api_for_data_model("example")

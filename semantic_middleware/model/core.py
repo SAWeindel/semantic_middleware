@@ -10,7 +10,19 @@ from pydantic import BaseModel, BeforeValidator, model_validator
 Identifier = TypeVar("Identifier", bound=str | int | UUID)
 Reference = TypeVar("Reference", bound=str | int | UUID)
 UnIdentifiable = (
-    str | int | float | bool | bytes | None | UUID | Enum | list | tuple | set | type | datetime
+    str
+    | int
+    | float
+    | bool
+    | bytes
+    | None
+    | UUID
+    | Enum
+    | list
+    | tuple
+    | set
+    | type
+    | datetime
 )
 
 
@@ -44,7 +56,7 @@ class Identifiable(BaseModel):
             data.update({"id": potential_id})
         else:
             # If data is an object, convert to dict and add id
-            if hasattr(data, 'model_dump'):
+            if hasattr(data, "model_dump"):
                 data_dict = data.model_dump()
             else:
                 data_dict = data.__dict__.copy()
@@ -53,4 +65,4 @@ class Identifiable(BaseModel):
         return data
 
 
-from aas_middleware.model.util import get_id
+from semantic_middleware.model.util import get_id

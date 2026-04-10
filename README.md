@@ -51,22 +51,22 @@ At first, we create a simple data model with the basic building blocks of the aa
 
 ```python
 import typing
-import aas_middleware
+import semantic_middleware
 
-class BillOfMaterialInfo(aas_middleware.SubmodelElementCollection):
+class BillOfMaterialInfo(semantic_middleware.SubmodelElementCollection):
     manufacterer: str
     product_type: str
 
-class BillOfMaterial(aas_middleware.Submodel):
+class BillOfMaterial(semantic_middleware.Submodel):
     components: typing.List[str]
     bill_of_material_info: BillOfMaterialInfo
 
 
-class ProcessModel(aas_middleware.Submodel):
+class ProcessModel(semantic_middleware.Submodel):
     processes: typing.List[str]
 
 
-class Product(aas_middleware.AAS):
+class Product(semantic_middleware.AAS):
     bill_of_material: BillOfMaterial
     process_model: typing.Optional[ProcessModel]
 ```
@@ -107,20 +107,20 @@ With this instance of the product, we can create a DataModel.
 
 
 ```python
-data_model = aas_middleware.DataModel.from_models(example_product)
+data_model = semantic_middleware.DataModel.from_models(example_product)
 ```
 
 
 The data model is a container for instances and types of data models. It makes access to individual objects easy and allows for formatting. E.g. we can easily transform the data model to either aas components of the [basyx python sdk](https://github.com/eclipse-basyx/basyx-python-sdk):
 
 ```python
-basyx_object_store = aas_middleware.formatting.BasyxFormatter().serialize(data_model)
+basyx_object_store = semantic_middleware.formatting.BasyxFormatter().serialize(data_model)
 ```
 
 Or serialize it to a JSON-serialized asset administration shell according to the official [specification of the asset administration shell ](https://industrialdigitaltwin.org/content-hub/aasspecifications):
 
 ```python
-formatter = aas_middleware.formatting.aasJsonFormatter()
+formatter = semantic_middleware.formatting.aasJsonFormatter()
 json_aas = formatter.serialize(data_model)
 print(json_aas)
 ```
@@ -134,7 +134,7 @@ This formatting transformation can also be reversed, so JSON-serialized or Basyx
 To start the aas-middleware and make our data model available through a rest API, we need to create an instance of the middleware and load the data model:
 
 ```python
-middleware = aas_middleware.Middleware()
+middleware = semantic_middleware.Middleware()
 middleware.load_data_model("example", data_model, persist_instances=True)
 middleware.generate_rest_api_for_data_model("example")
 
@@ -209,7 +209,7 @@ curl 'http://127.0.0.1:8000/graphql/?' \
 You probably saw during the startup of the middleware a warning log message like:
 
 ```
-WARNING:aas_middleware.middleware.registries:No persistence factory found for data_model_name='example' model_id=None contained_model_id=None field_id=None. Using default persistence factory.
+WARNING:semantic_middleware.middleware.registries:No persistence factory found for data_model_name='example' model_id=None contained_model_id=None field_id=None. Using default persistence factory.
 ```
 
 This message indicates that the aas-middleware has no specified persistence factory and stores the data model in internal storage. Besides internal storage, the aas-middleware can utilize different persistence mechanisms. For now, aas-middleware supports the storage of the data model in a basyx aas server (mongo db will come later).
@@ -217,7 +217,7 @@ This message indicates that the aas-middleware has no specified persistence fact
 Running the middleware with persistent storage of the data model in a basyx aas server can be done by interchanging the default `Middleware` with the `AasMiddleware`: 
 
 ```python
-middleware = aas_middleware.AasMiddleware()
+middleware = semantic_middleware.AasMiddleware()
 middleware.load_aas_persistent_data_model(
     "example", data_model, "localhost", 8081, "localhost", 8081, persist_instances=True
 )

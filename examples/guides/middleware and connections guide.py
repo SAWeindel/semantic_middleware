@@ -1,22 +1,23 @@
 import typing
-import aas_middleware
-from aas_middleware.model.data_model import DataModel
+import semantic_middleware
+from semantic_middleware.model.data_model import DataModel
 
 
-class BillOfMaterialInfo(aas_middleware.SubmodelElementCollection):
+class BillOfMaterialInfo(semantic_middleware.SubmodelElementCollection):
     manufacterer: str
     product_type: str
 
-class BillOfMaterial(aas_middleware.Submodel):
+
+class BillOfMaterial(semantic_middleware.Submodel):
     components: typing.List[str]
     bill_of_material_info: BillOfMaterialInfo
 
 
-class ProcessModel(aas_middleware.Submodel):
+class ProcessModel(semantic_middleware.Submodel):
     processes: typing.List[str]
 
 
-class Product(aas_middleware.AAS):
+class Product(semantic_middleware.AAS):
     bill_of_material: BillOfMaterial
     process_model: ProcessModel
 
@@ -47,11 +48,11 @@ example_product = Product(
 )
 
 
-# you can instantiate a data model from a list of models. Models need to be unique. The Data Model parses through the model and makes it and contained models easily available. 
+# you can instantiate a data model from a list of models. Models need to be unique. The Data Model parses through the model and makes it and contained models easily available.
 
-data_model = aas_middleware.DataModel.from_models(example_product)
+data_model = semantic_middleware.DataModel.from_models(example_product)
 
-# The passed models with this method are so called top level models. 
+# The passed models with this method are so called top level models.
 
 print(data_model.get_top_level_models())
 
@@ -83,21 +84,24 @@ top_level_types = data_model.get_top_level_types()
 # With this you can also create a type graph.
 
 
+# Formatting and Mapping of data
 
-# Formatting and Mapping of data 
-
-# Formatting is: chaning the notation / language of the data 
+# Formatting is: chaning the notation / language of the data
 # Mapping is: changing the concept of the data
 
 # The data model is the basic building block for formatting. The data model can be formatted in different ways. For example, the data model can be formatted in the Basyx format.
 
 
-basyx_object_store = aas_middleware.formatting.BasyxFormatter().serialize(data_model)
+basyx_object_store = semantic_middleware.formatting.BasyxFormatter().serialize(
+    data_model
+)
 
-json_aas = aas_middleware.formatting.AasJsonFormatter().serialize(data_model)
+json_aas = semantic_middleware.formatting.AasJsonFormatter().serialize(data_model)
 print(json_aas)
 
-reformatted_data_model = aas_middleware.formatting.AasJsonFormatter().deserialize(json_aas)
+reformatted_data_model = semantic_middleware.formatting.AasJsonFormatter().deserialize(
+    json_aas
+)
 print(reformatted_data_model.get_model("example_product_id"))
 
 
@@ -105,12 +109,14 @@ print(reformatted_data_model.get_model("example_product_id"))
 
 # a DataModel is a BaseModel and you can use it like that to create pydantic classes with attributes that bring the features of data models with it.
 
+
 class ProductModel(DataModel):
     bill_of_material: BillOfMaterial
     process_model: ProcessModel
 
 
-
-
-product_model = ProductModel(bill_of_material=example_product.bill_of_material, process_model=example_product.process_model)
+product_model = ProductModel(
+    bill_of_material=example_product.bill_of_material,
+    process_model=example_product.process_model,
+)
 print(product_model.get_model("example_bom_id"))

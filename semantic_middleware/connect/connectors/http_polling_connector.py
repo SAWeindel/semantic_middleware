@@ -4,7 +4,9 @@
 import aiohttp
 import anyio
 
-from aas_middleware.connect.connectors.http_request_connector import HttpRequestConnector
+from semantic_middleware.connect.connectors.http_request_connector import (
+    HttpRequestConnector,
+)
 
 
 class HttpPollingConnector(HttpRequestConnector):

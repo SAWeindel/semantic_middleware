@@ -4,27 +4,35 @@ from functools import wraps
 from typing import Any, Union
 import typing
 
-from aas_middleware.connect.connectors.connector import Connector, Consumer, Provider
-from aas_middleware.connect.connectors.async_connector import AsyncConnector
-from aas_middleware.connect.workflows.workflow import Workflow
+from semantic_middleware.connect.connectors.connector import (
+    Connector,
+    Consumer,
+    Provider,
+)
+from semantic_middleware.connect.connectors.async_connector import AsyncConnector
+from semantic_middleware.connect.workflows.workflow import Workflow
 
-from aas_middleware.model.data_model import DataModel
-from aas_middleware.model.formatting.formatter import Formatter
-from aas_middleware.model.mapping.mapper import Mapper
-from aas_middleware.model.util import get_value_attributes
+from semantic_middleware.model.data_model import DataModel
+from semantic_middleware.model.formatting.formatter import Formatter
+from semantic_middleware.model.mapping.mapper import Mapper
+from semantic_middleware.model.util import get_value_attributes
 
 
 if typing.TYPE_CHECKING:
-    from aas_middleware.middleware.registries import (
+    from semantic_middleware.middleware.registries import (
         ConnectionInfo,
         PersistenceConnectionRegistry,
     )
-    from aas_middleware.middleware.sync.persisted_connector import PersistedConnector
-    from aas_middleware.middleware.sync.synced_connector import (
-        SyncedConnector)
+    from semantic_middleware.middleware.sync.persisted_connector import (
+        PersistedConnector,
+    )
+    from semantic_middleware.middleware.sync.synced_connector import SyncedConnector
+
 
 async def update_persistence_with_value(
-    persistence_connector: PersistedConnector, connection_info: ConnectionInfo, value: Any
+    persistence_connector: PersistedConnector,
+    connection_info: ConnectionInfo,
+    value: Any,
 ):
     if not connection_info.contained_model_id and not connection_info.field_id:
         # TODO: handle case when id of model changes...

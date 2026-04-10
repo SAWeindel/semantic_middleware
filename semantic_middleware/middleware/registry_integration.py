@@ -10,10 +10,10 @@ from urllib.parse import urlparse
 
 from typing import TYPE_CHECKING
 
-from aas_middleware import get_version
+from semantic_middleware import get_version
 
 if TYPE_CHECKING:
-    from aas_middleware.middleware.middleware import MiddlewareMetaData
+    from semantic_middleware.middleware.middleware import MiddlewareMetaData
 
 
 def resolve_public_endpoint(default_host: str = "127.0.0.1", default_port: int = 8000):
@@ -72,7 +72,13 @@ def resolve_public_endpoint(default_host: str = "127.0.0.1", default_port: int =
 
 
 class RegistryIntegrator(ABC):
-    def __init__(self, registry_url: str, middleware_meta_data: MiddlewareMetaData, host: str, port: int):
+    def __init__(
+        self,
+        registry_url: str,
+        middleware_meta_data: MiddlewareMetaData,
+        host: str,
+        port: int,
+    ):
         self.registry_url = registry_url
         self.middleware_meta_data = middleware_meta_data
         self.host = host
@@ -85,9 +91,13 @@ class RegistryIntegrator(ABC):
 
 class ConsulIntegrator(RegistryIntegrator):
 
-    def __init__(self, 
-                 registry_url: str,  host: str, port: int,
-                 middleware_meta_data: MiddlewareMetaData):
+    def __init__(
+        self,
+        registry_url: str,
+        host: str,
+        port: int,
+        middleware_meta_data: MiddlewareMetaData,
+    ):
         super().__init__(registry_url, middleware_meta_data, host, port)
 
     async def register(self):
@@ -122,11 +132,15 @@ class ConsulIntegrator(RegistryIntegrator):
                 "DeregisterCriticalServiceAfter": "1m",
             },
         }
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=10)
+        ) as session:
             async with session.put(
                 f"{self.registry_url}/v1/agent/service/register",
                 json=consul_payload,
             ) as resp:
                 if resp.status != 200:
                     text = await resp.text()
-                    raise RuntimeError(f"Failed to register with Consul: {resp.status} {text}")
+                    raise RuntimeError(
+                        f"Failed to register with Consul: {resp.status} {text}"
+                    )

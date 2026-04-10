@@ -7,24 +7,24 @@ from graphene_pydantic import PydanticObjectType
 from graphene_pydantic.registry import get_global_registry
 
 import graphene
-from aas_middleware.connect.connectors.connector import Connector
-from aas_middleware.model.core import Identifiable
-from aas_middleware.model.util import (
+from semantic_middleware.connect.connectors.connector import Connector
+from semantic_middleware.model.core import Identifiable
+from semantic_middleware.model.util import (
     is_identifiable,
     is_identifiable_type,
     is_identifiable_type_container,
 )
 
 if typing.TYPE_CHECKING:
-    from aas_middleware.middleware.middleware import Middleware
-from aas_middleware.middleware.registries import ConnectionInfo
-from aas_middleware.model.data_model import DataModel
+    from semantic_middleware.middleware.middleware import Middleware
+from semantic_middleware.middleware.registries import ConnectionInfo
+from semantic_middleware.model.data_model import DataModel
 from starlette_graphene3 import (
     GraphQLApp,
     make_graphiql_handler,
 )
 
-from aas_middleware.model.formatting.aas.aas_middleware_util import (
+from semantic_middleware.model.formatting.aas.aas_middleware_util import (
     get_all_submodel_elements_from_submodel,
     get_contained_models_attribute_info,
     is_basemodel_union_type,
@@ -34,9 +34,9 @@ from aas_middleware.model.formatting.aas.aas_middleware_util import (
 from aas_pydantic.aas_model import AAS, Blob, File, Submodel, SubmodelElementCollection
 
 
-def get_base_query_and_mutation_classes() -> typing.Tuple[
-    graphene.ObjectType, graphene.ObjectType
-]:
+def get_base_query_and_mutation_classes() -> (
+    typing.Tuple[graphene.ObjectType, graphene.ObjectType]
+):
     """
     Returns the base query and mutation classes for the GraphQL endpoint.
 

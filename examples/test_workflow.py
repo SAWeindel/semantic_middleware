@@ -1,9 +1,9 @@
 import typing
-import aas_middleware
+import semantic_middleware
 import time
 
 
-middleware = aas_middleware.Middleware()
+middleware = semantic_middleware.Middleware()
 
 
 @middleware.workflow()
@@ -26,11 +26,13 @@ def long_running_workflow_blocking3(a: str) -> str:
     time.sleep(5)
     return a
 
+
 @middleware.workflow(queueing=True)
 def long_running_workflow_queuing(a: str) -> str:
     print("long_running_workflow_queuing")
     time.sleep(5)
     return a
+
 
 @middleware.workflow(queueing=True, pool_size=3)
 def long_running_workflow_queuing3(a: str) -> str:
@@ -41,7 +43,6 @@ def long_running_workflow_queuing3(a: str) -> str:
 
 if __name__ == "__main__":
     import uvicorn
-
 
     # uvicorn.run("test_workflow:middleware.app", reload=True)
     uvicorn.run(middleware.app)

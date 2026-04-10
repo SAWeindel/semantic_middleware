@@ -2,18 +2,20 @@ import json
 import pathlib
 import typing
 import uvicorn
-import aas_middleware
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxTemplateFormatter
+import semantic_middleware
+from semantic_middleware.model.formatting.aas.basyx_formatter import (
+    BasyxTemplateFormatter,
+)
 
 
-class FileAndBlobContainer(aas_middleware.Submodel):
-    html_file: aas_middleware.File
-    pdf_file: aas_middleware.File
-    html_blob: aas_middleware.Blob
-    pdf_blob: aas_middleware.Blob
+class FileAndBlobContainer(semantic_middleware.Submodel):
+    html_file: semantic_middleware.File
+    pdf_file: semantic_middleware.File
+    html_blob: semantic_middleware.Blob
+    pdf_blob: semantic_middleware.Blob
 
 
-class ExampleAAS(aas_middleware.AAS):
+class ExampleAAS(semantic_middleware.AAS):
     example_submodel: typing.Optional[FileAndBlobContainer] = None
 
 
@@ -30,17 +32,17 @@ example_product = ExampleAAS(
         id="example_blob_and_file_container",
         id_short="example_blob_and_file_container",
         description="Example Container for html and pdf blob and files.",
-        html_file=aas_middleware.File(
+        html_file=semantic_middleware.File(
             id_short="example_html_file",
             media_type="text/html",
             path="https://de.wikipedia.org/wiki/Industrie_4.0",
         ),
-        pdf_file=aas_middleware.File(
+        pdf_file=semantic_middleware.File(
             id_short="example_pdf_file",
             media_type="application/pdf",
             path="https://publikationen.bibliothek.kit.edu/1000168519/152272154",
         ),
-        html_blob=aas_middleware.Blob(
+        html_blob=semantic_middleware.Blob(
             id_short="example_html_blob",
             media_type="text/html",
             content=b"""
@@ -54,7 +56,7 @@ example_product = ExampleAAS(
                         </html>
                         """,
         ),
-        pdf_blob=aas_middleware.Blob(
+        pdf_blob=semantic_middleware.Blob(
             id_short="example_pdf_blob",
             media_type="application/pdf",
             content=pdf_file_content,
@@ -62,9 +64,9 @@ example_product = ExampleAAS(
     ),
 )
 
-data_model = aas_middleware.DataModel.from_models(example_product)
+data_model = semantic_middleware.DataModel.from_models(example_product)
 
-middleware = aas_middleware.AasMiddleware()
+middleware = semantic_middleware.AasMiddleware()
 middleware.load_aas_persistent_data_model(
     "example",
     data_model,

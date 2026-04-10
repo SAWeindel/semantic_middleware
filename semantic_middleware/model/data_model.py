@@ -6,10 +6,15 @@ from datetime import datetime
 
 from pydantic import BaseModel, ValidationError
 
-from aas_middleware.model.core import Identifiable
+from semantic_middleware.model.core import Identifiable
 
-from aas_middleware.model.reference_finder import ReferenceFinder, ReferenceInfo, ReferenceType, patch_references
-from aas_middleware.model.util import (
+from semantic_middleware.model.reference_finder import (
+    ReferenceFinder,
+    ReferenceInfo,
+    ReferenceType,
+    patch_references,
+)
+from semantic_middleware.model.util import (
     convert_under_score_to_camel_case_str,
     convert_camel_case_to_underscrore_str,
     get_id_with_patch,
@@ -20,7 +25,7 @@ from aas_middleware.model.util import (
     normalize_identifiables_in_model,
 )
 
-from aas_middleware.model.util import (
+from semantic_middleware.model.util import (
     replace_attribute_with_model,
 )
 
@@ -86,7 +91,9 @@ class DataModel(BaseModel):
         if is_identifiable_container(value) or value == []:
             current_values_of_the_attribute = super().__getattribute__(name)
             new_ids_of_models = set([get_id_with_patch(model) for model in value])
-            current_ids_of_models = set([get_id_with_patch(model) for model in current_values_of_the_attribute])
+            current_ids_of_models = set(
+                [get_id_with_patch(model) for model in current_values_of_the_attribute]
+            )
             model_ids_to_remove = current_ids_of_models - new_ids_of_models
             self.remove(*model_ids_to_remove)
             self.add(*value)
@@ -117,7 +124,9 @@ class DataModel(BaseModel):
         return data_model
 
     @classmethod
-    def from_model_types(cls, *model_types: Tuple[Type[Identifiable]], **data: Dict[str, Any]) -> DataModel:
+    def from_model_types(
+        cls, *model_types: Tuple[Type[Identifiable]], **data: Dict[str, Any]
+    ) -> DataModel:
         """
         Method to create a data model a provided list of model types.
 
@@ -187,7 +196,9 @@ class DataModel(BaseModel):
         """
         if schema.__name__ in self._schemas:
             return
-        all_schemas, schema_reference_infos = ReferenceFinder.find_schema_references(schema)
+        all_schemas, schema_reference_infos = ReferenceFinder.find_schema_references(
+            schema
+        )
         self._add_contained_schemas(all_schemas)
         self._add_top_level_schema(schema)
         self._add_schema_references_to_referencing_schemas_dict(schema_reference_infos)
@@ -228,7 +239,10 @@ class DataModel(BaseModel):
         if not self._models_key_type[type_name]:
             self._models_key_type.pop(type_name)
         underscore_type_name = convert_camel_case_to_underscrore_str(type_name)
-        if underscore_type_name in self._top_level_models and model_id in self._top_level_models[underscore_type_name]:
+        if (
+            underscore_type_name in self._top_level_models
+            and model_id in self._top_level_models[underscore_type_name]
+        ):
             self._top_level_models[underscore_type_name].remove(model_id)
             if not self._top_level_models[underscore_type_name]:
                 self._top_level_models.pop(underscore_type_name)
@@ -265,7 +279,9 @@ class DataModel(BaseModel):
         # at first check if this model is refernced, if so, raise an error
         referncing_models = self.get_referencing_models(model)
         if referncing_models:
-            raise ValueError(f"Model with id {model_id} is referenced by other models and can therefore not be removed. Remove all references to {model_id} first.")
+            raise ValueError(
+                f"Model with id {model_id} is referenced by other models and can therefore not be removed. Remove all references to {model_id} first."
+            )
         # remove all references to this model
         if model_id in self._reference_info_dict_for_referencing:
             references_dict = self._reference_info_dict_for_referencing.pop(model_id)
@@ -282,7 +298,9 @@ class DataModel(BaseModel):
                     pass
 
     def _add_contained_models(
-        self, top_level_model: Identifiable, contained_models_map: Dict[str, Identifiable]
+        self,
+        top_level_model: Identifiable,
+        contained_models_map: Dict[str, Identifiable],
     ) -> None:
         """
         Method to load all contained models of a model.
@@ -293,7 +311,7 @@ class DataModel(BaseModel):
         """
         for contained_model_id, contained_model in contained_models_map.items():
             if contained_model_id in self.model_ids:
-                continue # model already loaded, imhomoegeneous data model would be found in normalize_identifiables_in_model
+                continue  # model already loaded, imhomoegeneous data model would be found in normalize_identifiables_in_model
             self._add_model(contained_model)
 
     def _add_contained_schemas(
@@ -316,7 +334,9 @@ class DataModel(BaseModel):
         ReferenceInfos of Type Reference are patched so that another ReferenceInfo is added to every schema that has a class name that contains the reference id.
         ReferenceInfos of Type Attribute are patched so that another ReferenceInfo is added to every schema that has a class name that contains the reference id.
         """
-        reference_infos = patch_references(self._schema_reference_infos, self._schemas.values())
+        reference_infos = patch_references(
+            self._schema_reference_infos, self._schemas.values()
+        )
         self._schema_reference_infos = reference_infos
         self._add_schema_references_to_referencing_schemas_dict(reference_infos)
 
@@ -345,7 +365,9 @@ class DataModel(BaseModel):
                 referencing_model_id
             ] = reference_info
 
-    def _add_schema_references_to_referencing_schemas_dict(self, reference_infos: Set[ReferenceInfo]) -> None:
+    def _add_schema_references_to_referencing_schemas_dict(
+        self, reference_infos: Set[ReferenceInfo]
+    ) -> None:
         """
         Method to add information about referencing schema ids of the input schema.
 
@@ -423,7 +445,9 @@ class DataModel(BaseModel):
                     break
             else:
                 raise ValueError(f"Type {class_name} not supported.")
-            if not isinstance(attribute_value, list) and not isinstance(attribute_value, dict):
+            if not isinstance(attribute_value, list) and not isinstance(
+                attribute_value, dict
+            ):
                 raise ValueError(f"Attribute value {attribute_value} not supported.")
             if not isinstance(attribute_value, list):
                 attribute_value = [attribute_value]
@@ -645,7 +669,11 @@ class DataModel(BaseModel):
         referenced_model_dict = self._reference_info_dict_for_referencing[
             referencing_model_id
         ]
-        return [self.get_model(model_id) for model_id in referenced_model_dict if model_id in self.model_ids]
+        return [
+            self.get_model(model_id)
+            for model_id in referenced_model_dict
+            if model_id in self.model_ids
+        ]
 
     def get_referenced_models_of_type(
         self, referencing_model: Identifiable, referenced_model_type: Type[T]

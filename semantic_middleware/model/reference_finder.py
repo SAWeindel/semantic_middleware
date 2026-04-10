@@ -7,9 +7,12 @@ from weakref import ref
 from pydantic import BaseModel, ConfigDict
 from enum import Enum
 
-from aas_middleware.model.core import Identifiable
-from aas_middleware.model.schema_util import get_all_contained_schemas, get_attribute_dict_of_schema
-from aas_middleware.model.util import (
+from semantic_middleware.model.core import Identifiable
+from semantic_middleware.model.schema_util import (
+    get_all_contained_schemas,
+    get_attribute_dict_of_schema,
+)
+from semantic_middleware.model.util import (
     get_all_contained_identifiables,
     get_id_with_patch,
     get_identifiable_types,
@@ -30,6 +33,7 @@ class ReferenceType(Enum):
     - Reference: The reference element is an object and the reference in the model is done by referencing the id of the referenced object.
     - Attribute: The referenced element is an primitive attribute of the model.
     """
+
     ASSOCIATION = "association"
     REFERENCE = "reference"
     ATTRIBUTE = "attribute"
@@ -52,7 +56,9 @@ class ReferenceInfo(BaseModel):
     model_config = ConfigDict(frozen=True)
 
 
-def get_reference_infos_of_model(model_id: str, model: Identifiable) -> Set[ReferenceInfo]:
+def get_reference_infos_of_model(
+    model_id: str, model: Identifiable
+) -> Set[ReferenceInfo]:
     """
     Method to add information about referencing model ids of the input model.
 
@@ -93,7 +99,9 @@ def get_reference_infos_of_model(model_id: str, model: Identifiable) -> Set[Refe
     return reference_infos
 
 
-def get_reference_infos(identifiable_map: Dict[str, Identifiable]) -> Set[ReferenceInfo]:
+def get_reference_infos(
+    identifiable_map: Dict[str, Identifiable],
+) -> Set[ReferenceInfo]:
     """
     Method to get all reference infos of a list of identifiables.
 
@@ -132,8 +140,12 @@ def get_reference_infos_of_schema(schema: Type[Identifiable]) -> Set[ReferenceIn
     return reference_infos
 
 
-def get_reference_info_for_schema(schema: Type[Identifiable], attribute_name: str, attribute_type: Type[Identifiable]) -> Optional[ReferenceInfo]:
-    if is_identifiable_type(attribute_type) or is_identifiable_type_container(attribute_type):
+def get_reference_info_for_schema(
+    schema: Type[Identifiable], attribute_name: str, attribute_type: Type[Identifiable]
+) -> Optional[ReferenceInfo]:
+    if is_identifiable_type(attribute_type) or is_identifiable_type_container(
+        attribute_type
+    ):
         return ReferenceInfo(
             identifiable_id=schema.__name__,
             reference_id=attribute_type.__name__,
@@ -151,9 +163,11 @@ def get_reference_info_for_schema(schema: Type[Identifiable], attribute_name: st
             reference_id=f"{schema.__name__}.{attribute_name}",
             reference_type=ReferenceType.ATTRIBUTE,
         )
-    
 
-def patch_references(references: Set[ReferenceInfo], schemas: List[Type[Identifiable]]) -> Set[ReferenceInfo]:
+
+def patch_references(
+    references: Set[ReferenceInfo], schemas: List[Type[Identifiable]]
+) -> Set[ReferenceInfo]:
     patched_references = set()
     schema_names = {schema.__name__.split(".")[-1] for schema in schemas}
     for reference in references:
@@ -162,7 +176,11 @@ def patch_references(references: Set[ReferenceInfo], schemas: List[Type[Identifi
         elif reference.reference_type == ReferenceType.ATTRIBUTE:
             for schema_name in schema_names:
                 adjusted_reference_id = reference.reference_id.split(".")[-1]
-                if adjusted_reference_id in schema_name and len(adjusted_reference_id) > len(schema_name) and not reference.identifiable_id == schema_name:
+                if (
+                    adjusted_reference_id in schema_name
+                    and len(adjusted_reference_id) > len(schema_name)
+                    and not reference.identifiable_id == schema_name
+                ):
                     patched_references.add(
                         ReferenceInfo(
                             identifiable_id=reference.reference_id,
@@ -170,10 +188,14 @@ def patch_references(references: Set[ReferenceInfo], schemas: List[Type[Identifi
                             reference_type=ReferenceType.REFERENCE,
                         )
                     )
-    
+
         elif reference.reference_type == ReferenceType.REFERENCE:
             for schema_name in schema_names:
-                if reference.reference_id in schema_name and len(reference.reference_id) < len(schema_name) and not reference.identifiable_id == schema_name:
+                if (
+                    reference.reference_id in schema_name
+                    and len(reference.reference_id) < len(schema_name)
+                    and not reference.identifiable_id == schema_name
+                ):
                     patched_references.add(
                         ReferenceInfo(
                             identifiable_id=reference.reference_id,
@@ -183,7 +205,6 @@ def patch_references(references: Set[ReferenceInfo], schemas: List[Type[Identifi
                     )
 
     return references | patched_references
-
 
 
 def get_schema_reference_infos(schemas: List[Type[Identifiable]]) -> Set[ReferenceInfo]:
@@ -200,7 +221,6 @@ def get_schema_reference_infos(schemas: List[Type[Identifiable]]) -> Set[Referen
     for schema in schemas:
         reference_infos.update(get_reference_infos_of_schema(schema))
     return reference_infos
-
 
 
 class ReferenceFinder:
@@ -238,8 +258,8 @@ class ReferenceFinder:
 
     @classmethod
     def find_schema_references(
-            cls,
-            model: Identifiable,
+        cls,
+        model: Identifiable,
     ) -> Tuple[List[Identifiable], Set[ReferenceInfo]]:
         """
         Method to find all contained models (inclusive the model itself) and references in a given model.
@@ -254,7 +274,7 @@ class ReferenceFinder:
         finder.model = model
         finder.find_contained_schemas_and_references()
         return finder.contained_schemas, finder.schema_references
-    
+
     def find_contained_schemas_and_references(self):
         """
         Method to find all contained identifiables (inclusive the model itself) and references in the model.
@@ -262,6 +282,3 @@ class ReferenceFinder:
         self.contained_schemas = get_all_contained_schemas(self.model)
         self.schema_references = get_schema_reference_infos(self.contained_schemas)
         # FIXME: resolve empty referenced nodes without an associated type -> either find subclasses or classes that contain the referenced name (e.g. "acticePoleHousing" for class "PoleHousing")
-
-
-

@@ -1,6 +1,6 @@
 from typing import Protocol, Any
 
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model import DataModel
 
 
 class Formatter(Protocol):

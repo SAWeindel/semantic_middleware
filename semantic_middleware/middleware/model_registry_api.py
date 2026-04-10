@@ -2,16 +2,22 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List
 import json
 
-from aas_middleware.model.formatting.json_schema.json_schema_to_pydantic_formatter import JsonSchemaFormatter, JsonSchemaToPydanticParser
-from aas_middleware.model.util import get_identifiable_attributes_dict_of_model, is_identifiable_type
+from semantic_middleware.model.formatting.json_schema.json_schema_to_pydantic_formatter import (
+    JsonSchemaFormatter,
+    JsonSchemaToPydanticParser,
+)
+from semantic_middleware.model.util import (
+    get_identifiable_attributes_dict_of_model,
+    is_identifiable_type,
+)
 
 if TYPE_CHECKING:
-    from aas_middleware.middleware.middleware import Middleware
+    from semantic_middleware.middleware.middleware import Middleware
 
 from fastapi import APIRouter, HTTPException, FastAPI
 from fastapi.openapi.utils import get_openapi
 
-from aas_middleware.middleware.rest_routers import RestRouter
+from semantic_middleware.middleware.rest_routers import RestRouter
 
 
 from typing import Dict
@@ -73,9 +79,7 @@ def register_model_from_middleware(
     model_name: str, model: dict, middleware_instance: Middleware
 ):
     data_model = JsonSchemaFormatter().deserialize(model)
-    middleware_instance.load_data_model(
-        model_name, data_model, persist_instances=True
-    )
+    middleware_instance.load_data_model(model_name, data_model, persist_instances=True)
     rest_router = RestRouter(data_model, model_name, middleware_instance)
     routers = rest_router.generate_endpoints()
     update_openapi(middleware_instance.app)

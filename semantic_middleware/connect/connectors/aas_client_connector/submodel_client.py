@@ -5,8 +5,8 @@ from typing import List, Optional
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from aas_middleware.connect.connectors.aas_client_connector import client_utils
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.connect.connectors.aas_client_connector import client_utils
+from semantic_middleware.model.data_model import DataModel
 from aas_pydantic import aas_model
 
 from ba_syx_aas_environment_component_client import Client as SubmodelClient
@@ -22,9 +22,9 @@ from ba_syx_aas_environment_component_client.models.submodel import (
 )
 from basyx.aas import model as basyx_model
 
-# from aas_middleware.model.formatting.aas.convert_aas import convert_submodel_to_model
-# from aas_middleware.model.formatting.aas.convert_pydantic import convert_model_to_submodel
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxFormatter
+# from semantic_middleware.model.formatting.aas.convert_aas import convert_submodel_to_model
+# from semantic_middleware.model.formatting.aas.convert_pydantic import convert_model_to_submodel
+from semantic_middleware.model.formatting.aas.basyx_formatter import BasyxFormatter
 from aas_pydantic.convert_aas_instance import (
     convert_submodel_to_model_instance,
 )

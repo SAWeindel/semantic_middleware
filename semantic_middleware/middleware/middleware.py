@@ -10,38 +10,41 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from basyx.aas import model
 
-import aas_middleware
-from aas_middleware.connect.connectors.async_connector import AsyncConnector, Receiver
-from aas_middleware.connect.connectors.connector import Connector
-from aas_middleware.connect.workflows.blocking_workflow import BlockingWorkflow
-from aas_middleware.connect.workflows.queuing_workflow import QueueingWorkflow
-from aas_middleware.middleware.connector_router import (
+import semantic_middleware
+from semantic_middleware.connect.connectors.async_connector import (
+    AsyncConnector,
+    Receiver,
+)
+from semantic_middleware.connect.connectors.connector import Connector
+from semantic_middleware.connect.workflows.blocking_workflow import BlockingWorkflow
+from semantic_middleware.connect.workflows.queuing_workflow import QueueingWorkflow
+from semantic_middleware.middleware.connector_router import (
     generate_connector_endpoint,
     generate_synced_connector_endpoint,
 )
-from aas_middleware.middleware.graphql_routers import GraphQLRouter
-from aas_middleware.middleware.registries import (
+from semantic_middleware.middleware.graphql_routers import GraphQLRouter
+from semantic_middleware.middleware.registries import (
     ConnectionInfo,
     ConnectionRegistry,
     MapperRegistry,
     PersistenceConnectionRegistry,
     WorkflowRegistry,
 )
-from aas_middleware.middleware.model_registry_api import generate_model_api
-from aas_middleware.middleware.persistence_factory import PersistenceFactory
-from aas_middleware.middleware.rest_routers import RestRouter
-from aas_middleware.middleware.sync.synchronization import (
+from semantic_middleware.middleware.model_registry_api import generate_model_api
+from semantic_middleware.middleware.persistence_factory import PersistenceFactory
+from semantic_middleware.middleware.rest_routers import RestRouter
+from semantic_middleware.middleware.sync.synchronization import (
     synchronize_workflow_with_persistence_consumer,
     synchronize_workflow_with_persistence_provider,
 )
-from aas_middleware.middleware.workflow_router import generate_workflow_endpoint
-from aas_middleware.connect.workflows.workflow import Workflow
-from aas_middleware.model.core import Identifiable
-from aas_middleware.model.data_model import DataModel
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxFormatter
-from aas_middleware.model.formatting.formatter import Formatter
-from aas_middleware.model.mapping.mapper import Mapper
-from aas_middleware.middleware.sync.synced_connector import (
+from semantic_middleware.middleware.workflow_router import generate_workflow_endpoint
+from semantic_middleware.connect.workflows.workflow import Workflow
+from semantic_middleware.model.core import Identifiable
+from semantic_middleware.model.data_model import DataModel
+from semantic_middleware.model.formatting.aas.basyx_formatter import BasyxFormatter
+from semantic_middleware.model.formatting.formatter import Formatter
+from semantic_middleware.model.mapping.mapper import Mapper
+from semantic_middleware.middleware.sync.synced_connector import (
     SyncedConnector,
     SyncRole,
     SyncDirection,
@@ -65,7 +68,7 @@ class MiddlewareMetaData(BaseModel):
     description: str = """
     The aas-middleware allows to convert aas models to pydantic models and generate a REST or GraphQL API from them.
     """
-    version: str = Field(default=aas_middleware.VERSION)
+    version: str = Field(default=semantic_middleware.VERSION)
     contact: typing.Dict[str, str] = {
         "name": "Sebastian Behrendt",
         "email": "sebastian.behrendt@kit.edu",
@@ -116,11 +119,11 @@ class Middleware:
         )
 
     def connect_to_registry(
-            self,
-            registry_type: typing.Literal["consul"],
-            registry_url: str,
-            host: str,
-            port: int
+        self,
+        registry_type: typing.Literal["consul"],
+        registry_url: str,
+        host: str,
+        port: int,
     ):
         """
         Function to connect the middleware to a service registry.
@@ -132,7 +135,9 @@ class Middleware:
             port (int): The port of the middleware.
         """
         if registry_type == "consul":
-            from aas_middleware.middleware.registry_integration import ConsulIntegrator
+            from semantic_middleware.middleware.registry_integration import (
+                ConsulIntegrator,
+            )
 
             self.registry_integrator = ConsulIntegrator(
                 registry_url, host, port, self.meta_data
@@ -192,7 +197,7 @@ class Middleware:
                     await task
                 except asyncio.CancelledError:
                     pass
-        
+
         for workflow in self.workflow_registry.get_workflows():
             if workflow.on_shutdown:
                 if workflow.running:
@@ -204,7 +209,7 @@ class Middleware:
 
         # Cancel any background tasks from connectors
         for connector in self.connection_registry.connectors.values():
-            if hasattr(connector, '_background_tasks'):
+            if hasattr(connector, "_background_tasks"):
                 for task in connector._background_tasks:
                     if not task.done():
                         task.cancel()
@@ -244,10 +249,10 @@ class Middleware:
             @app.get("/", response_model=str)
             async def root():
                 return "Welcome to aas-middleware!"
-            
+
             @app.get("/health", response_model=str)
             async def health():
-                return "OK" 
+                return "OK"
 
         return self._app
 
@@ -517,7 +522,7 @@ class Middleware:
                 # Store the task for proper cleanup
                 receive_task = asyncio.create_task(run_receive())
                 # Store the task in the connector for cleanup later
-                if not hasattr(synced_connector, '_background_tasks'):
+                if not hasattr(synced_connector, "_background_tasks"):
                     synced_connector._background_tasks = []
                 synced_connector._background_tasks.append(receive_task)
             # Replace the original connector with the synced one
@@ -531,6 +536,7 @@ class Middleware:
                 model_type,
             )
             self.app.include_router(router)
+
         # make this if the app isnt started already
         if not self._startup_complete:
             self.add_callback("on_start_up", initiate_sync)

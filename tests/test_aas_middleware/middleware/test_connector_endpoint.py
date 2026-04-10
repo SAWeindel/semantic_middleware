@@ -3,10 +3,10 @@ import asyncio
 from fastapi.testclient import TestClient
 
 
-from aas_middleware.middleware.connector_router import ConnectorDescription
-from aas_middleware.middleware.registries import ConnectionInfo
-from aas_middleware.middleware.middleware import Middleware
-from aas_middleware.middleware.sync.synced_connector import SyncDirection, SyncRole
+from semantic_middleware.middleware.connector_router import ConnectorDescription
+from semantic_middleware.middleware.registries import ConnectionInfo
+from semantic_middleware.middleware.middleware import Middleware
+from semantic_middleware.middleware.sync.synced_connector import SyncDirection, SyncRole
 from tests.conftest import TrivialFloatConnector, ValidAAS, ExampleSubmodel
 from tests.test_aas_middleware.middleware.test_aas import (
     get_all_aas,

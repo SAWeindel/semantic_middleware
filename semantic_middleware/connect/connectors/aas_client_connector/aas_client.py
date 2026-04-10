@@ -6,15 +6,15 @@ from basyx.aas import model
 
 from pydantic import BaseModel
 
-from aas_middleware.connect.connectors.aas_client_connector import client_utils
-from aas_middleware.connect.connectors.aas_client_connector.submodel_client import (
+from semantic_middleware.connect.connectors.aas_client_connector import client_utils
+from semantic_middleware.connect.connectors.aas_client_connector.submodel_client import (
     get_all_basyx_submodels_from_server,
     get_submodel_from_server,
     post_submodel_to_server,
     put_submodel_to_server,
     submodel_is_on_server,
 )
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model import DataModel
 from aas_pydantic import aas_model
 
 from ba_syx_aas_environment_component_client import Client as AASClient
@@ -28,14 +28,14 @@ from ba_syx_aas_environment_component_client.api.asset_administration_shell_repo
 )
 from fastapi import HTTPException
 
-from aas_middleware.connect.connectors.aas_client_connector.aas_client_model import (
+from semantic_middleware.connect.connectors.aas_client_connector.aas_client_model import (
     ClientModel,
 )
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxFormatter
+from semantic_middleware.model.formatting.aas.basyx_formatter import BasyxFormatter
 from aas_pydantic.convert_pydantic_model import (
     convert_model_to_aas,
 )
-from aas_middleware.model.util import get_value_attributes
+from semantic_middleware.model.util import get_value_attributes
 
 import logging
 

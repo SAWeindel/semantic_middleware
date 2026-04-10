@@ -1,6 +1,7 @@
 from typing import AsyncGenerator, Protocol, Any, runtime_checkable
 
-from aas_middleware.connect.connectors.connector import Connector
+from semantic_middleware.connect.connectors.connector import Connector
+
 
 @runtime_checkable
 class Receiver(Protocol):
@@ -10,7 +11,7 @@ class Receiver(Protocol):
             ConnectionError: If the connection to the server could not be established.
         """
         ...
-    
+
     async def disconnect(self) -> None:
         """
         Raises:
@@ -29,5 +30,6 @@ class Receiver(Protocol):
             ConnectionError: If the receiving of the data failed.
         """
         ...
+
 
 class AsyncConnector(Connector, Receiver): ...

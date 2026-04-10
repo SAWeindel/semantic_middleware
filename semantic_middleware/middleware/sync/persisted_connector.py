@@ -1,13 +1,24 @@
 from typing import Any, TypeVar, Union, AsyncGenerator
 
-from aas_middleware.connect.connectors.connector import Connector, Provider, Consumer
-from aas_middleware.connect.connectors.async_connector import AsyncConnector, Receiver
-from aas_middleware.middleware.sync.synced_connector import (
+from semantic_middleware.connect.connectors.connector import (
+    Connector,
+    Provider,
+    Consumer,
+)
+from semantic_middleware.connect.connectors.async_connector import (
+    AsyncConnector,
+    Receiver,
+)
+from semantic_middleware.middleware.sync.synced_connector import (
     SyncDirection,
     SyncRole,
 )
-from aas_middleware.middleware.sync.connector_sync_manager import connector_sync_manager
-from aas_middleware.middleware.sync.synchronization import update_connector_with_value
+from semantic_middleware.middleware.sync.connector_sync_manager import (
+    connector_sync_manager,
+)
+from semantic_middleware.middleware.sync.synchronization import (
+    update_connector_with_value,
+)
 
 T = TypeVar("T")
 
@@ -59,7 +70,9 @@ class PersistedConnector:
             # Update the connector
             if isinstance(synced_connector.connector, Consumer):
                 connection_info = synced_connector.connection_info
-                await update_connector_with_value(synced_connector, connection_info, transformed_value)
+                await update_connector_with_value(
+                    synced_connector, connection_info, transformed_value
+                )
 
     async def _sync_ground_truth_connecters(self) -> None:
         """
@@ -108,7 +121,6 @@ class PersistedConnector:
 
         await self.connector.consume(body)
         await self._notify_synced_connectors(body)
-
 
     async def receive(self) -> AsyncGenerator[T, None]:
         if not isinstance(self.connector, Receiver):

@@ -1,5 +1,5 @@
-from aas_middleware.model.data_model import DataModel
-from aas_middleware.model.data_model_rebuilder import DataModelRebuilder
+from semantic_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model_rebuilder import DataModelRebuilder
 from aas_pydantic import aas_model
 from aas_pydantic.convert_pydantic_type import logger
 
@@ -19,7 +19,10 @@ def infere_aas_structure(
     Returns:
         Tuple[List[aas_model.AAS], List[aas_model.Submodel]]: Tuple with AAS models and Submodel models
     """
-    if all(all(isinstance(model, aas_model.AAS) for model in model_items) for model_items in data.get_top_level_models().values()):
+    if all(
+        all(isinstance(model, aas_model.AAS) for model in model_items)
+        for model_items in data.get_top_level_models().values()
+    ):
         top_level_models_list = []
         for models in data.get_top_level_models().values():
             top_level_models_list += models

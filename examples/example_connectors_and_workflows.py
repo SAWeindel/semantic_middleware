@@ -3,26 +3,26 @@ import random
 import typing
 
 from pydantic import BaseModel
-import aas_middleware
-from aas_middleware.middleware.sync.synced_connector import SyncRole
-from aas_middleware.model.mapping.mapper import Mapper
+import semantic_middleware
+from semantic_middleware.middleware.sync.synced_connector import SyncRole
+from semantic_middleware.model.mapping.mapper import Mapper
 
 
-class BillOfMaterialInfo(aas_middleware.SubmodelElementCollection):
+class BillOfMaterialInfo(semantic_middleware.SubmodelElementCollection):
     manufacterer: str
     product_type: str
 
 
-class BillOfMaterial(aas_middleware.Submodel):
+class BillOfMaterial(semantic_middleware.Submodel):
     components: typing.List[str]
     bill_of_material_info: BillOfMaterialInfo
 
 
-class ProductState(aas_middleware.Submodel):
+class ProductState(semantic_middleware.Submodel):
     temperature: float
 
 
-class Product(aas_middleware.AAS):
+class Product(semantic_middleware.AAS):
     bill_of_material: BillOfMaterial
     product_state: typing.Optional[ProductState] = None
 
@@ -52,12 +52,12 @@ example_product = Product(
     ),
 )
 
-data_model = aas_middleware.DataModel.from_models(example_product)
+data_model = semantic_middleware.DataModel.from_models(example_product)
 
-middleware = aas_middleware.Middleware()
+middleware = semantic_middleware.Middleware()
 middleware.load_data_model("example", data_model, persist_instances=True)
 
-# middleware = aas_middleware.AasMiddleware()
+# middleware = semantic_middleware.AasMiddleware()
 # middleware.load_aas_persistent_data_model(
 #     "example", data_model, "localhost", 8081, "localhost", 8081, persist_instances=True
 # )
@@ -113,7 +113,7 @@ example_connector = TrivialConnector()
 
 middleware.add_synced_connector(
     connector_id="test_connector",
-    connector=example_connector, 
+    connector=example_connector,
     model_type=str,
     data_model_name="example",
     model_id="example_product_id",
@@ -132,6 +132,7 @@ middleware.add_synced_connector(
     field_id="temperature",
     sync_role=SyncRole.GROUND_TRUTH,
 )
+
 
 class OtherProductModel(BaseModel):
     id: str

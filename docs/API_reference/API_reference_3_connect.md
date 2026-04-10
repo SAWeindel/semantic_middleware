@@ -1,3 +1,3 @@
 # Connect API
 
-::: aas_middleware.connect
+::: semantic_middleware.connect

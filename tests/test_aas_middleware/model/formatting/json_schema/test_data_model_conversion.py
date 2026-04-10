@@ -1,8 +1,10 @@
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model import DataModel
 
 
-from aas_middleware.model.formatting.json_schema.json_schema_to_pydantic_formatter import JsonSchemaFormatter
-from aas_middleware.model.formatting.util import compare_schemas
+from semantic_middleware.model.formatting.json_schema.json_schema_to_pydantic_formatter import (
+    JsonSchemaFormatter,
+)
+from semantic_middleware.model.formatting.util import compare_schemas
 from tests.conftest import (
     ValidAAS,
     ExampleSubmodelWithReference,
@@ -22,7 +24,10 @@ def test_minimal_example(example_aas: ValidAAS):
     dynamic_top_level_types = dynamic_model.get_top_level_types()
     assert len(dynamic_top_level_types) == 1
     dynamic_valid_aas = dynamic_top_level_types[0]
-    assert compare_schemas(example_aas.model_json_schema(), dynamic_valid_aas.model_json_schema())
+    assert compare_schemas(
+        example_aas.model_json_schema(), dynamic_valid_aas.model_json_schema()
+    )
+
 
 def test_more_complex_example(
     example_aas: ValidAAS,

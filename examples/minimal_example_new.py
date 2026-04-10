@@ -1,9 +1,11 @@
 import json
 import typing
 import uvicorn
-import aas_middleware
-from aas_middleware.model.core import Identifiable
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxTemplateFormatter
+import semantic_middleware
+from semantic_middleware.model.core import Identifiable
+from semantic_middleware.model.formatting.aas.basyx_formatter import (
+    BasyxTemplateFormatter,
+)
 
 
 class BillOfMaterialInfo(Identifiable):
@@ -40,30 +42,25 @@ example_product = Product(
         ),
     ),
     process_model=ProcessModel(
-        id="example_process_model_id",
-        processes=["process_1", "process_2"]
+        id="example_process_model_id", processes=["process_1", "process_2"]
     ),
     primitive=1.0,
     primitive_list=["1", "2"],
     process_model_list=[
         ProcessModel(
-            id="example_process_model_id_1",
-            processes=["process_1", "process_2"]
+            id="example_process_model_id_1", processes=["process_1", "process_2"]
         ),
         ProcessModel(
-            id="example_process_model_id_2",
-            processes=["process_3", "process_4"]
+            id="example_process_model_id_2", processes=["process_3", "process_4"]
         ),
     ],
 )
 
-data_model = aas_middleware.DataModel.from_models(example_product)
+data_model = semantic_middleware.DataModel.from_models(example_product)
 
 
-middleware = aas_middleware.Middleware()
-middleware.load_data_model(
-    "example", data_model, persist_instances=True
-)
+middleware = semantic_middleware.Middleware()
+middleware.load_data_model("example", data_model, persist_instances=True)
 
 middleware.generate_rest_api_for_data_model("example")
 # FIXME: graphql not adjusted yet.

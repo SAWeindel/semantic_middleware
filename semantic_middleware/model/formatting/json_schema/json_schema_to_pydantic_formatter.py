@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List, Protocol, Any
 from uuid import UUID
 
-from aas_middleware.model.data_model import DataModel as AasMiddlewareDataModel
+from semantic_middleware.model.data_model import DataModel as AasMiddlewareDataModel
 
 # Standard Library
 from collections import defaultdict
@@ -40,7 +40,7 @@ from datamodel_code_generator.parser.jsonschema import (
 from datamodel_code_generator.types import DataTypeManager, StrictTypes
 from pydantic import BaseModel, ConfigDict, Field, create_model
 
-from aas_middleware.model.util import convert_camel_case_to_underscrore_str
+from semantic_middleware.model.util import convert_camel_case_to_underscrore_str
 
 
 class JsonSchemaFormatter:
@@ -74,17 +74,22 @@ class JsonSchemaFormatter:
         dynamic_type = jsonschema_to_pydantic(data)
         # test if all attributes are called like the class and if all are lists, if so create a DataModel from the types
         if all(
-            typing.get_origin(field_info.annotation) == list and attribute_name == convert_camel_case_to_underscrore_str(typing.get_args(field_info.annotation)[0].__name__)
+            typing.get_origin(field_info.annotation) == list
+            and attribute_name
+            == convert_camel_case_to_underscrore_str(
+                typing.get_args(field_info.annotation)[0].__name__
+            )
             for attribute_name, field_info in dynamic_type.model_fields.items()
         ):
-            all_types = [typing.get_args(field_info.annotation)[0] for field_info in dynamic_type.model_fields.values()]
+            all_types = [
+                typing.get_args(field_info.annotation)[0]
+                for field_info in dynamic_type.model_fields.values()
+            ]
             return AasMiddlewareDataModel.from_model_types(*all_types)
         return AasMiddlewareDataModel.from_model_types(dynamic_type)
 
 
-def generate_dynamic_schema(
-    models: list[Type[BaseModel]]
-) -> dict[str, Any]:
+def generate_dynamic_schema(models: list[Type[BaseModel]]) -> dict[str, Any]:
     # Define fields for the new DataModel, each as a List of the provided model type
     fields = {
         convert_camel_case_to_underscrore_str(model.__name__): (list[model], None)
@@ -92,9 +97,7 @@ def generate_dynamic_schema(
     }
 
     # Dynamically create a new DataModel with the specified fields
-    dynamic_datamodel_for_schema: type[BaseModel] = create_model(
-        f"DataModel", **fields
-    )
+    dynamic_datamodel_for_schema: type[BaseModel] = create_model(f"DataModel", **fields)
 
     # Generate and return the JSON schema for the dynamically created DataModel
     return dynamic_datamodel_for_schema.model_json_schema()
@@ -112,7 +115,7 @@ ORIGIN_TYPES = {
     "Any": Any,
     "Literal": Literal,
     "UUID": UUID,
-    "Field": Field
+    "Field": Field,
 }
 
 
@@ -261,7 +264,9 @@ def jsonschema_to_pydantic(
                 any(
                     True
                     for already_sorted_result in sorted_results
-                    if ref.split("/")[-1] == already_sorted_result.name or ref.split("/")[-1].split("#")[0] == convert_camel_case_to_underscrore_str(already_sorted_result.name)
+                    if ref.split("/")[-1] == already_sorted_result.name
+                    or ref.split("/")[-1].split("#")[0]
+                    == convert_camel_case_to_underscrore_str(already_sorted_result.name)
                 )
                 for ref in result.reference_classes
             ):
@@ -273,7 +278,10 @@ def jsonschema_to_pydantic(
 
     for sorted_result in sorted_results:
         fields = {}
-        if sorted_result.base_class == "Enum" and "#-datamodel-code-generator-#-enum-#-special-#" in sorted_result.path:
+        if (
+            sorted_result.base_class == "Enum"
+            and "#-datamodel-code-generator-#-enum-#-special-#" in sorted_result.path
+        ):
             dynamic_models.update(
                 {
                     sorted_result.name: typing.Literal[
@@ -294,17 +302,23 @@ def jsonschema_to_pydantic(
             continue
         for attr in sorted_result.fields:
             if attr.annotated is not None and "unique_items" in attr.annotated:
-                assert attr.type_hint[:4] == "List", f"unique_items only allowed for List types, got {attr.type_hint}"
+                assert (
+                    attr.type_hint[:4] == "List"
+                ), f"unique_items only allowed for List types, got {attr.type_hint}"
                 inner_type_hint = attr.type_hint[5:-1]
                 str_type_hint = f"Set[{inner_type_hint}]"
-            elif attr.annotated is not None and ("max_items" in attr.annotated or "min_items" in attr.annotated):
+            elif attr.annotated is not None and (
+                "max_items" in attr.annotated or "min_items" in attr.annotated
+            ):
                 # TODO: if datamodel-code-generator supports correct tuple transformation, update this to correctly consider the inner type hint
                 str_type_hint = "Tuple[Any, ...]"
                 # str_type_hint = attr.annotated.replace(
                 #     "max_items", "max_length"
                 # ).replace("min_items", "min_length")
             else:
-                str_type_hint = attr.annotated if attr.annotated is not None else attr.type_hint
+                str_type_hint = (
+                    attr.annotated if attr.annotated is not None else attr.type_hint
+                )
             if str_type_hint is None:
                 type_hint = NoneType
             else:

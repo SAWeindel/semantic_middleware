@@ -1,4 +1,4 @@
-from aas_middleware import Middleware
+from semantic_middleware import Middleware
 from aas_pydantic.aas_model import AAS
 
 

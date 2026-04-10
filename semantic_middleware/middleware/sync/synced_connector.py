@@ -13,14 +13,23 @@ from typing import (
 )
 import typing
 
-from aas_middleware.connect.connectors.connector import Connector, Consumer, Provider
-from aas_middleware.connect.connectors.async_connector import AsyncConnector, Receiver
+from semantic_middleware.connect.connectors.connector import (
+    Connector,
+    Consumer,
+    Provider,
+)
+from semantic_middleware.connect.connectors.async_connector import (
+    AsyncConnector,
+    Receiver,
+)
 
-from aas_middleware.middleware.sync.connector_sync_manager import connector_sync_manager
-from aas_middleware.model.formatting.formatter import Formatter
-from aas_middleware.model.mapping.mapper import Mapper
+from semantic_middleware.middleware.sync.connector_sync_manager import (
+    connector_sync_manager,
+)
+from semantic_middleware.model.formatting.formatter import Formatter
+from semantic_middleware.model.mapping.mapper import Mapper
 
-from aas_middleware.middleware.sync.synchronization import (
+from semantic_middleware.middleware.sync.synchronization import (
     get_persistence_value,
     update_persistence_with_value,
     adjust_body_for_persistence_schema,
@@ -28,10 +37,11 @@ from aas_middleware.middleware.sync.synchronization import (
 )
 
 if typing.TYPE_CHECKING:
-    from aas_middleware.middleware.registries import (
+    from semantic_middleware.middleware.registries import (
         ConnectionInfo,
         PersistenceConnectionRegistry,
     )
+
 
 class SyncRole(Enum):
     """Defines the role of a connector in the synchronization process."""
@@ -199,7 +209,7 @@ class SyncedConnector(Generic[T]):
             await self._update_persistence_value(persistence_data)
 
         return connector_data
-    
+
     async def consume_unsynced(self, body: T) -> None:
         """
         Consumes data without synchronization.

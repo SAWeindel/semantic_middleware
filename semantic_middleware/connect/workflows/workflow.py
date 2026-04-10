@@ -9,11 +9,15 @@ import anyio.to_thread
 from exceptiongroup import ExceptionGroup, catch
 import typeguard
 
-from aas_middleware.connect.workflows.worfklow_description import WorkflowDescription
+from semantic_middleware.connect.workflows.worfklow_description import (
+    WorkflowDescription,
+)
+
 
 def typechecked_partial(func, *args, **kwargs):
     wrapped = typeguard.typechecked(func)
     return functools.partial(wrapped, *args, **kwargs)
+
 
 class Workflow:
     """
@@ -25,6 +29,7 @@ class Workflow:
         on_startup (bool, optional): If True, the workflow function is executed on startup. Defaults to False.
         on_shutdown (bool, optional): If True, the workflow function is executed on shutdown. Defaults to False.
     """
+
     def __init__(
         self,
         workflow_function: Union[Awaitable[None], Callable[..., None]],
@@ -76,27 +81,21 @@ class Workflow:
         capability: Optional[str] = None,
         **kwargs: Dict[str, Any],
     ):
-        workflow_function = typechecked_partial(
-            func, *args, **kwargs
-        )
+        workflow_function = typechecked_partial(func, *args, **kwargs)
         return cls(
             workflow_function=workflow_function,
             on_startup=on_startup,
             on_shutdown=on_shutdown,
             interval=interval,
-            capability=capability
+            capability=capability,
         )
 
     async def _run_workflow_function(self, *args, **kwargs) -> Awaitable[Any]:
         if inspect.iscoroutinefunction(self.workflow_function):
             return await self.workflow_function(*args, **kwargs)
         else:
-            partial_func = functools.partial(
-                self.workflow_function, *args, **kwargs
-            )
-            return await anyio.to_thread.run_sync(
-                partial_func, abandon_on_cancel=True
-            )
+            partial_func = functools.partial(self.workflow_function, *args, **kwargs)
+            return await anyio.to_thread.run_sync(partial_func, abandon_on_cancel=True)
 
     def handle_error(self, excgroup: ExceptionGroup, execution_id: str) -> None:
         for exc in excgroup.exceptions:
@@ -124,7 +123,9 @@ class Workflow:
 
     async def _execute_once(self, *args, **kwargs) -> Awaitable[None]:
         execution_id = str(uuid.uuid4())
-        handle_error_partial = functools.partial(self.handle_error, execution_id=execution_id)
+        handle_error_partial = functools.partial(
+            self.handle_error, execution_id=execution_id
+        )
         with catch({Exception: handle_error_partial}):
             async with anyio.create_task_group() as tg:
                 self.task_groups[execution_id] = tg
@@ -137,7 +138,9 @@ class Workflow:
 
     async def _execute_repeatedly(self, *args, **kwargs) -> Awaitable[None]:
         execution_id = str(uuid.uuid4())
-        handle_error_partial = functools.partial(self.handle_error, execution_id=execution_id)
+        handle_error_partial = functools.partial(
+            self.handle_error, execution_id=execution_id
+        )
         with catch({Exception: handle_error_partial}):
             async with anyio.create_task_group() as tg:
                 self.task_groups[execution_id] = tg
@@ -150,6 +153,9 @@ class Workflow:
         if not self.running:
             raise ValueError("No workflow is running.")
         for _, task_group in self.task_groups.items():
-            if task_group.cancel_scope.cancel_called or task_group.cancel_scope.cancelled_caught:
+            if (
+                task_group.cancel_scope.cancel_called
+                or task_group.cancel_scope.cancelled_caught
+            ):
                 continue
             task_group.cancel_scope.cancel()

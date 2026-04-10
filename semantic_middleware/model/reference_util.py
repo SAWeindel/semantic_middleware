@@ -1,9 +1,12 @@
 from types import NoneType
 import typing
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model import DataModel
 from aas_pydantic.aas_model import Blob, File, Submodel
-from aas_middleware.model.schema_util import get_attribute_dict_of_schema
-from aas_middleware.model.util import is_identifiable_type, is_identifiable_type_container
+from semantic_middleware.model.schema_util import get_attribute_dict_of_schema
+from semantic_middleware.model.util import (
+    is_identifiable_type,
+    is_identifiable_type_container,
+)
 
 
 def get_path_to_top_level_model_instance(
@@ -139,7 +142,7 @@ def get_attribute_paths_to_contained_type(
             attribute_paths.extend(arg_attribute_paths)
         # remove duplicates
         attribute_paths = list({tuple(path): path for path in attribute_paths}.values())
-    else:   
+    else:
         attribute_paths = get_attribute_paths_to_type(contained_type, data_model)
     new_attribute_paths = []
     for attribute_path in attribute_paths:

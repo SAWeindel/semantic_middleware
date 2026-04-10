@@ -5,18 +5,18 @@ import httpx
 from httpx import AsyncClient, Limits
 from fastapi import HTTPException
 
-from aas_middleware.connect.connectors.aas_client_connector.aas_client import (
+from semantic_middleware.connect.connectors.aas_client_connector.aas_client import (
     aas_is_on_server,
     delete_aas_from_server,
     get_aas_from_server,
     post_aas_to_server,
     put_aas_to_server,
 )
-from aas_middleware.connect.connectors.aas_client_connector.client_utils import (
+from semantic_middleware.connect.connectors.aas_client_connector.client_utils import (
     check_aas_and_sm_server_online,
     check_sm_server_online,
 )
-from aas_middleware.connect.connectors.aas_client_connector.submodel_client import (
+from semantic_middleware.connect.connectors.aas_client_connector.submodel_client import (
     delete_submodel_from_server,
     get_submodel_from_server,
     post_submodel_to_server,
@@ -94,7 +94,7 @@ class _SharedClientManager:
             await async_client.aclose()
         cls._clients.clear()
         cls._httpx_args_map.clear()
-    
+
     @classmethod
     async def close_client(cls, base_url: str) -> None:
         """Close a specific client by base_url"""

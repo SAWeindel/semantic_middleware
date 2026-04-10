@@ -2,10 +2,10 @@ from typing import Any, Literal, Optional, Type, TypeVar, Union, List
 import typing
 from pydantic import BaseModel, Field, create_model
 
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model import DataModel
 from aas_pydantic import aas_model
-from aas_middleware.model.reference_finder import ReferenceType
-from aas_middleware.model.util import (
+from semantic_middleware.model.reference_finder import ReferenceType
+from semantic_middleware.model.util import (
     get_id_with_patch,
     get_value_attributes,
     is_identifiable,

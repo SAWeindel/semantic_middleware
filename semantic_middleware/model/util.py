@@ -9,7 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
-from aas_middleware.model.core import (
+from semantic_middleware.model.core import (
     Identifiable,
     Identifier,
     Reference,
@@ -175,7 +175,9 @@ def is_identifiable_type(schema: Type[Any]) -> bool:
     return True
 
 
-def get_identifiable_types(attribute_type: Type[Identifiable]) -> List[Type[Identifiable]]:
+def get_identifiable_types(
+    attribute_type: Type[Identifiable],
+) -> List[Type[Identifiable]]:
     identifiable_types = []
     if typing.get_origin(attribute_type) in [list, set, tuple, dict, Union]:
         attribute_types = typing.get_args(attribute_type)
@@ -185,6 +187,7 @@ def get_identifiable_types(attribute_type: Type[Identifiable]) -> List[Type[Iden
     for arg in filtered_attribute_types:
         identifiable_types += get_identifiable_types(arg)
     return identifiable_types
+
 
 def is_identifiable_type_container(schema: Type[Any]) -> bool:
     """
@@ -202,10 +205,12 @@ def is_identifiable_type_container(schema: Type[Any]) -> bool:
     else:
         outer_type = schema
 
-    if not outer_type in [list,  tuple, set, dict, Union]:
+    if not outer_type in [list, tuple, set, dict, Union]:
         return False
     if outer_type == dict:
-        raise NotImplementedError("Dicts are not supported yet. Try using classes instead.")
+        raise NotImplementedError(
+            "Dicts are not supported yet. Try using classes instead."
+        )
     type_arguments = get_identifiable_types(schema)
     if not type_arguments:
         return False
@@ -231,8 +236,8 @@ def is_identifiable_container(model: Any) -> bool:
         return False
 
     if isinstance(model, dict):
-    #     # return any(is_identifiable(k) or is_identifiable(v) for k, v in model.items())
-    #     raise NotImplementedError("Dicts are not supported yet. Try using classes instead.")
+        #     # return any(is_identifiable(k) or is_identifiable(v) for k, v in model.items())
+        #     raise NotImplementedError("Dicts are not supported yet. Try using classes instead.")
         return True
     return any(is_identifiable(element) for element in model)
 
@@ -255,7 +260,9 @@ def get_identifiable_attributes_dict_of_model(
     else:
         attribute_dict = vars(potential_identifiable_container)
     for attribute_name, attribute_value in attribute_dict.items():
-        if not is_identifiable(attribute_value) or is_identifiable_container(attribute_value):
+        if not is_identifiable(attribute_value) or is_identifiable_container(
+            attribute_value
+        ):
             continue
         referable_values[attribute_name] = attribute_value
     return referable_values
@@ -272,6 +279,7 @@ def get_identifiable_attributes_of_model(
         referable_values += get_values_as_identifiable_list(attribute_value)
     return referable_values
 
+
 def get_unidentifiable_attributes_of_model(
     potential_identifiable_container: Identifiable,
 ) -> Dict[str, UnIdentifiable]:
@@ -285,8 +293,9 @@ def get_unidentifiable_attributes_of_model(
             unidentifiable_values[attribute_name] = attribute_value
     return unidentifiable_values
 
+
 def add_non_redundant_identifiable(
-    model_id:str, model: Identifiable, identifiable_map: Dict[str, Identifiable]
+    model_id: str, model: Identifiable, identifiable_map: Dict[str, Identifiable]
 ) -> Dict[str, Identifiable]:
     """
     Method to add an Identifiable to a list of Identifiables if it is not already in the list.
@@ -321,12 +330,16 @@ def get_all_contained_identifiables(model: Identifiable) -> Dict[str, Identifiab
             identifiable_attribute
         )
         for model_id, identifiable in in_attribute_contained_identifiables.items():
-            add_non_redundant_identifiable(model_id, identifiable, contained_identifiables)
+            add_non_redundant_identifiable(
+                model_id, identifiable, contained_identifiables
+            )
     if is_identifiable_container(model):
         for item in model:
             in_attribute_contained_identifiables = get_all_contained_identifiables(item)
             for model_id, identifiable in in_attribute_contained_identifiables.items():
-                add_non_redundant_identifiable(model_id, identifiable, contained_identifiables)
+                add_non_redundant_identifiable(
+                    model_id, identifiable, contained_identifiables
+                )
     elif is_identifiable(model):
         model_id = get_id_with_patch(model)
         add_non_redundant_identifiable(model_id, model, contained_identifiables)
@@ -404,6 +417,7 @@ REFERENCE_ATTRIBUTE_NAMES_SUFFIXES = [
     "identities",
 ]
 
+
 def get_reference_name(attribute_name: str, attribute_type: Type[Any]) -> Optional[str]:
     """
     Function to get the reference name of an attribute.
@@ -415,22 +429,41 @@ def get_reference_name(attribute_name: str, attribute_type: Type[Any]) -> Option
     Returns:
         str: The name of the referenced type.
     """
-    if attribute_name in REFERENCE_ATTRIBUTE_NAMES_SUFFIXES or attribute_name in STANDARD_AAS_FIELDS:
-        return 
+    if (
+        attribute_name in REFERENCE_ATTRIBUTE_NAMES_SUFFIXES
+        or attribute_name in STANDARD_AAS_FIELDS
+    ):
+        return
 
     if attribute_type == Reference or attribute_type == "Reference":
         return attribute_name
-    elif typing.get_origin(attribute_type) in [List, Set, Tuple, Union] and Reference in typing.get_args(attribute_type):
+    elif typing.get_origin(attribute_type) in [
+        List,
+        Set,
+        Tuple,
+        Union,
+    ] and Reference in typing.get_args(attribute_type):
         return attribute_name
-    elif any (attribute_name.endswith(suffix) for suffix in REFERENCE_ATTRIBUTE_NAMES_SUFFIXES):
-        suffix = next(suffix for suffix in REFERENCE_ATTRIBUTE_NAMES_SUFFIXES if attribute_name.endswith(suffix))
+    elif any(
+        attribute_name.endswith(suffix) for suffix in REFERENCE_ATTRIBUTE_NAMES_SUFFIXES
+    ):
+        suffix = next(
+            suffix
+            for suffix in REFERENCE_ATTRIBUTE_NAMES_SUFFIXES
+            if attribute_name.endswith(suffix)
+        )
         underscore_consideration = False
         if attribute_name.endswith(f"_{suffix}"):
             underscore_consideration = True
-        attribute_name_without_suffix = attribute_name[:-(len(suffix) + underscore_consideration)]
-        if attribute_name_without_suffix.endswith("s") and not attribute_name_without_suffix.endswith("ss"):
+        attribute_name_without_suffix = attribute_name[
+            : -(len(suffix) + underscore_consideration)
+        ]
+        if attribute_name_without_suffix.endswith(
+            "s"
+        ) and not attribute_name_without_suffix.endswith("ss"):
             attribute_name_without_suffix = attribute_name_without_suffix[:-1]
         return convert_under_score_to_camel_case_str(attribute_name_without_suffix)
+
 
 def get_attribute_name_encoded_references(model: Identifiable) -> List[str]:
     """
@@ -467,7 +500,9 @@ def get_attribute_name_encoded_references(model: Identifiable) -> List[str]:
     return referenced_ids
 
 
-def convert_to_fitting_identifiable_container_type(list_container: List[Identifiable], container_type: Type[Any]) -> List[Identifiable] | Tuple[Identifiable] | Set[Identifiable]:
+def convert_to_fitting_identifiable_container_type(
+    list_container: List[Identifiable], container_type: Type[Any]
+) -> List[Identifiable] | Tuple[Identifiable] | Set[Identifiable]:
     """
     Function to convert a list of identifiables to a fitting container type.
 
@@ -509,7 +544,13 @@ def replace_attribute_with_model(model: Identifiable, existing_model: Identifiab
                     list_attribute_value[i] = existing_model
                 else:
                     replace_attribute_with_model(item, existing_model)
-            setattr(model, attribute_name, convert_to_fitting_identifiable_container_type(list_attribute_value, type(attribute_value)))
+            setattr(
+                model,
+                attribute_name,
+                convert_to_fitting_identifiable_container_type(
+                    list_attribute_value, type(attribute_value)
+                ),
+            )
 
 
 STANDARD_AAS_FIELDS = {"id", "description", "id_short", "semantic_id"}
@@ -579,30 +620,36 @@ def models_are_equal(model1: Identifiable, model2: Identifiable) -> bool:
     return True
 
 
-def check_and_replace(model: Identifiable, id_map: Dict[str, Identifiable]) -> Identifiable:
-        model_id = get_id_with_patch(model)
+def check_and_replace(
+    model: Identifiable, id_map: Dict[str, Identifiable]
+) -> Identifiable:
+    model_id = get_id_with_patch(model)
 
-        # If the model is already in the id_map and the values are the same, return the cached model
-        if model_id in id_map:
-            existing_model = id_map[model_id]
-            if not model.model_dump() == existing_model.model_dump():
-                raise ValueError(
-                    f"Duplicate models with id {model_id} have different values"
-                )
-            return existing_model
-        # If it's not a duplicate, add it to the map and check nested models
-        id_map[model_id] = model
+    # If the model is already in the id_map and the values are the same, return the cached model
+    if model_id in id_map:
+        existing_model = id_map[model_id]
+        if not model.model_dump() == existing_model.model_dump():
+            raise ValueError(
+                f"Duplicate models with id {model_id} have different values"
+            )
+        return existing_model
+    # If it's not a duplicate, add it to the map and check nested models
+    id_map[model_id] = model
 
-        for field_name, field_value in get_identifiable_attributes_dict_of_model(model).items():
-            if is_identifiable(field_value):
-                setattr(model, field_name, check_and_replace(field_value, id_map))
-            elif is_identifiable_container(field_value):
-                normalized_list = [check_and_replace(item, id_map) for item in field_value]
-                setattr(model, field_name, normalized_list)
-        return model
+    for field_name, field_value in get_identifiable_attributes_dict_of_model(
+        model
+    ).items():
+        if is_identifiable(field_value):
+            setattr(model, field_name, check_and_replace(field_value, id_map))
+        elif is_identifiable_container(field_value):
+            normalized_list = [check_and_replace(item, id_map) for item in field_value]
+            setattr(model, field_name, normalized_list)
+    return model
 
 
-def normalize_identifiables_in_model(models: List[Identifiable], id_map: Optional[Dict[str, Identifiable]] = None):
+def normalize_identifiables_in_model(
+    models: List[Identifiable], id_map: Optional[Dict[str, Identifiable]] = None
+):
     """
     Normalize a list of Pydantic models by replacing duplicate models that share the same ID
     and have the same values.

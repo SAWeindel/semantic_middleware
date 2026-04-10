@@ -5,12 +5,12 @@ from weakref import WeakValueDictionary
 
 
 if TYPE_CHECKING:
-    from aas_middleware.middleware.sync.synced_connector import (
+    from semantic_middleware.middleware.sync.synced_connector import (
         SyncedConnector,
         SyncRole,
         SyncDirection,
     )
-    from aas_middleware.middleware.registries import ConnectionInfo
+    from semantic_middleware.middleware.registries import ConnectionInfo
 
 
 class ConnectorSyncManager:

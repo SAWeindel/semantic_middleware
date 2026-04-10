@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import List, Optional
 
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model import DataModel
 
 
-from aas_middleware.model.formatting.aas.aas_meta_model_inference import (
+from semantic_middleware.model.formatting.aas.aas_meta_model_inference import (
     infere_aas_structure,
 )
 from aas_pydantic.aas_model import AAS, BasyxModels, Submodel

@@ -2,11 +2,15 @@ import json
 import typing
 from fastapi import HTTPException
 import uvicorn
-import aas_middleware
-from aas_middleware.middleware.model_registry_api import register_model_from_middleware
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxTemplateFormatter
+import semantic_middleware
+from semantic_middleware.middleware.model_registry_api import (
+    register_model_from_middleware,
+)
+from semantic_middleware.model.formatting.aas.basyx_formatter import (
+    BasyxTemplateFormatter,
+)
 
-middleware = aas_middleware.Middleware()
+middleware = semantic_middleware.Middleware()
 
 middleware.generate_model_registry_api()
 

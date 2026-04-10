@@ -1,7 +1,7 @@
 import asyncio
 from typing import Generic, Optional, TypeVar
 
-from aas_middleware.connect.connectors.aas_client_connector.aas_client_connector import (
+from semantic_middleware.connect.connectors.aas_client_connector.aas_client_connector import (
     BasyxAASConnector,
     BasyxSubmodelConnector,
 )

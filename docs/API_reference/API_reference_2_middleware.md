@@ -1,3 +1,3 @@
 # Middleware
 
-::: aas_middleware.middleware
+::: semantic_middleware.middleware

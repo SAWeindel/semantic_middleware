@@ -2,9 +2,9 @@ from typing import Dict, Literal, Optional
 import igraph as ig
 from matplotlib import pyplot as plt
 from pydantic import BaseModel
-from aas_middleware.model.data_model import DataModel
-from aas_middleware.model.reference_finder import ReferenceType
-from aas_middleware.model.util import get_id_with_patch
+from semantic_middleware.model.data_model import DataModel
+from semantic_middleware.model.reference_finder import ReferenceType
+from semantic_middleware.model.util import get_id_with_patch
 
 
 def get_instance_graph(
@@ -80,7 +80,11 @@ def get_type_graph(
     return graph
 
 
-def visualize_graph(graph: ig.Graph, show: bool = False, save: Optional[Literal["png", "jpg", "svg"]] = None):
+def visualize_graph(
+    graph: ig.Graph,
+    show: bool = False,
+    save: Optional[Literal["png", "jpg", "svg"]] = None,
+):
 
     # graph.vs["name"] = ["\n\n" + label.split(".")[-1] for label in graph.vs["name"]]
     graph.vs["name"] = [label.split(".")[-1] for label in graph.vs["name"]]
@@ -165,6 +169,7 @@ def visualize_graph(graph: ig.Graph, show: bool = False, save: Optional[Literal[
         fig.savefig(f"{graph['title']}.jpg")
     elif save == "svg":
         fig.savefig(f"{graph['title']}.svg")
+
 
 import numpy as np
 

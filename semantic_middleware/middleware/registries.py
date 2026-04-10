@@ -2,21 +2,27 @@ import typing
 
 import logging
 
-from aas_middleware.model.mapping.mapper import Mapper
+from semantic_middleware.model.mapping.mapper import Mapper
 
 
 from pydantic import BaseModel, ConfigDict
 
 import asyncio
 
-from aas_middleware.connect.connectors.connector import Connector, Consumer, Provider
-from aas_middleware.connect.connectors.async_connector import Receiver
-from aas_middleware.connect.connectors.model_connector import ModelConnector
-from aas_middleware.connect.workflows.worfklow_description import WorkflowDescription
-from aas_middleware.connect.workflows.workflow import Workflow
-from aas_middleware.middleware.persistence_factory import PersistenceFactory
-from aas_middleware.model.core import Identifiable
-from aas_middleware.middleware.sync.persisted_connector import (
+from semantic_middleware.connect.connectors.connector import (
+    Connector,
+    Consumer,
+    Provider,
+)
+from semantic_middleware.connect.connectors.async_connector import Receiver
+from semantic_middleware.connect.connectors.model_connector import ModelConnector
+from semantic_middleware.connect.workflows.worfklow_description import (
+    WorkflowDescription,
+)
+from semantic_middleware.connect.workflows.workflow import Workflow
+from semantic_middleware.middleware.persistence_factory import PersistenceFactory
+from semantic_middleware.model.core import Identifiable
+from semantic_middleware.middleware.sync.persisted_connector import (
     wrap_persistence_connector,
 )
 
@@ -113,7 +119,7 @@ class ConnectionRegistry:
         connector_id: str,
         connection_info: ConnectionInfo,
         connector: Connector,
-        type_connection_info: typing.Type[typing.Any]
+        type_connection_info: typing.Type[typing.Any],
     ):
         """
         Function to add a connection to the connection manager.
@@ -363,21 +369,26 @@ class PersistenceConnectionRegistry(ConnectionRegistry):
         # Wrap persistence connectors to enable bidirectional sync
         wrapped_connector = wrap_persistence_connector(connector, connector_id)
         if isinstance(connector, Receiver):
+
             async def run_receive():
                 try:
                     async for _ in wrapped_connector.receive():
                         pass
                 except asyncio.CancelledError:
                     # Task was cancelled, exit gracefully
-                    logger.debug(f"Receive task for connector '{connector_id}' was cancelled")
+                    logger.debug(
+                        f"Receive task for connector '{connector_id}' was cancelled"
+                    )
                     raise
                 except Exception as e:
                     logger.error(
                         f"Error in receive task for connector '{connector_id}': {e}",
-                        exc_info=True
+                        exc_info=True,
                     )
+
             asyncio.create_task(run_receive())
         super().add_connector(connector_id, wrapped_connector, connection_type)
+
     def remove_connection(self, connection_info: ConnectionInfo):
         """
         Function to remove a connection from the connection manager.

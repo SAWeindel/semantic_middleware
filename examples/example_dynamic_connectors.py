@@ -2,10 +2,13 @@ import json
 import typing
 from fastapi import HTTPException
 import uvicorn
-import aas_middleware
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxTemplateFormatter
+import semantic_middleware
+from semantic_middleware.model.formatting.aas.basyx_formatter import (
+    BasyxTemplateFormatter,
+)
 
-middleware = aas_middleware.Middleware()
+middleware = semantic_middleware.Middleware()
+
 
 class TrivialConnector:
     def __init__(self, return_value: str = "default value"):
@@ -30,7 +33,9 @@ middleware.add_connector("test_connector", example_connector, model_type=str)
 
 
 @middleware.workflow()
-def add_dynamic_connectors_workflow(connector_name: str, return_value: str) -> dict[str, str]:
+def add_dynamic_connectors_workflow(
+    connector_name: str, return_value: str
+) -> dict[str, str]:
     dynamic_connector = TrivialConnector(return_value=return_value)
     if connector_name in middleware.connection_registry.connectors:
         raise HTTPException(400, "Already exists")
@@ -42,6 +47,7 @@ def add_dynamic_connectors_workflow(connector_name: str, return_value: str) -> d
         "return_value": return_value,
         "result": "dynamic connector added",
     }
+
 
 # test with:
 # curl -X 'POST' \
@@ -56,6 +62,3 @@ def add_dynamic_connectors_workflow(connector_name: str, return_value: str) -> d
 if __name__ == "__main__":
     # uvicorn.run("minimal_example:middleware.app", reload=True)
     uvicorn.run(middleware.app)
-
-
-

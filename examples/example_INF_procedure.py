@@ -3,15 +3,20 @@ import typing
 from fastapi import HTTPException
 from pydantic import BaseModel
 import uvicorn
-import aas_middleware
-from aas_middleware.middleware.model_registry_api import register_model_from_middleware
-from aas_middleware.middleware.sync.synced_connector import SyncDirection, SyncRole
-from aas_middleware.model.formatting.aas.basyx_formatter import BasyxTemplateFormatter
+import semantic_middleware
+from semantic_middleware.middleware.model_registry_api import (
+    register_model_from_middleware,
+)
+from semantic_middleware.middleware.sync.synced_connector import SyncDirection, SyncRole
+from semantic_middleware.model.formatting.aas.basyx_formatter import (
+    BasyxTemplateFormatter,
+)
 
-middleware = aas_middleware.Middleware()
+middleware = semantic_middleware.Middleware()
 
 
 ## mockup classes to work without ontology or mqtt connection^
+
 
 class ExampleTransferUnit(BaseModel):
     # this model would be generated dynamically from ontology, only mockup here
@@ -45,6 +50,7 @@ async def get_ontology_data_json_schema() -> dict:
     # Here we return a mockup json schema for the ExampleTransferUnit.
     return ExampleTransferUnit.model_json_schema()
 
+
 async def load_ontology_instance_data() -> ExampleTransferUnit:
     return ExampleTransferUnit(
         id="ExampleTransferUnit",
@@ -52,6 +58,7 @@ async def load_ontology_instance_data() -> ExampleTransferUnit:
         mqtt_broker_ip="hivemq.example.com",
         mqtt_broker_port=1883,
     )
+
 
 @middleware.workflow()
 async def load_ontology_data_model() -> dict[str, str]:
@@ -92,7 +99,7 @@ async def load_ontology_instance_data_and_register_connector() -> dict[str, str]
         model_id=ontology_instance.id,
         field_id="conveyor_speed",
         sync_role=SyncRole.GROUND_TRUTH,
-        sync_direction=SyncDirection.TO_PERSISTENCE
+        sync_direction=SyncDirection.TO_PERSISTENCE,
     )
     # 6. force FastAPI to rebuild its OpenAPI schema so `/docs` sees it:
     middleware.app.openapi_schema = None
@@ -105,6 +112,7 @@ async def load_ontology_instance_data_and_register_connector() -> dict[str, str]
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(middleware.app)
 
 

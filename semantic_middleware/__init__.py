@@ -27,15 +27,15 @@ def get_version() -> str:
 
 VERSION = get_version()
 
-from aas_middleware.middleware.middleware import Middleware
-from aas_middleware.middleware.aas_persistence_middleware import AasMiddleware
+from semantic_middleware.middleware.middleware import Middleware
+from semantic_middleware.middleware.aas_persistence_middleware import AasMiddleware
 
-from aas_middleware.model.core import Reference, Identifier
-from aas_middleware.model.data_model import DataModel
-from aas_middleware.model.data_model_rebuilder import DataModelRebuilder
+from semantic_middleware.model.core import Reference, Identifier
+from semantic_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model_rebuilder import DataModelRebuilder
 
 from aas_pydantic.aas_model import AAS, Submodel, SubmodelElementCollection, Blob, File
 
-from aas_middleware.model import formatting
+from semantic_middleware.model import formatting
 
-from aas_middleware.connect import connectors
+from semantic_middleware.connect import connectors

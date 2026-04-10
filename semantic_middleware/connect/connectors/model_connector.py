@@ -1,10 +1,10 @@
-
 from typing import Generic, Optional, TypeVar
 
 
-from aas_middleware.model.core import Identifiable
+from semantic_middleware.model.core import Identifiable
 
 T = TypeVar("T", bound=Identifiable)
+
 
 class ModelConnector(Generic[T]):
     def __init__(self, model: Optional[Identifiable]):

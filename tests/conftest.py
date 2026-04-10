@@ -14,17 +14,17 @@ from pydantic import BaseModel
 import pytest
 import uvicorn
 
-from aas_middleware.middleware.aas_persistence_middleware import AasMiddleware
-from aas_middleware.model.core import Identifier, Reference
+from semantic_middleware.middleware.aas_persistence_middleware import AasMiddleware
+from semantic_middleware.model.core import Identifier, Reference
 
-from aas_middleware.model.data_model import DataModel
+from semantic_middleware.model.data_model import DataModel
 from aas_pydantic.aas_model import (
     AAS,
     Submodel,
     SubmodelElementCollection,
 )
 
-from aas_middleware.middleware.middleware import Middleware
+from semantic_middleware.middleware.middleware import Middleware
 
 
 class ExampleEnum(str, Enum):
@@ -614,7 +614,7 @@ def example_sync_connector_middleware(
         AAS_SERVER_PORT,
         SUBMODEL_SERVER_ADDRESS,
         SUBMODEL_SERVER_PORT,
-        persist_instances=True
+        persist_instances=True,
     )
     middleware.generate_rest_api_for_data_model("test")
 
@@ -638,7 +638,7 @@ def client(example_middleware: Middleware) -> TestClient:
     Create a new FastAPI TestClient based on the current app.
     """
     return TestClient(example_middleware.app)
-    
+
 
 @pytest.fixture(scope="function")
 def sync_connector_client(example_sync_connector_middleware: Middleware) -> TestClient:

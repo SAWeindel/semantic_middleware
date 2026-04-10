@@ -11,26 +11,28 @@ from fastapi.responses import (
 from pydantic import BaseModel
 
 from typing import TYPE_CHECKING, List, Type, Dict, Union
-from aas_middleware.connect.connectors.connector import Connector
-from aas_middleware.middleware import middleware
-from aas_middleware.middleware.registries import ConnectionInfo
-from aas_middleware.model import data_model
-from aas_middleware.model.core import Identifiable
-from aas_middleware.model.data_model import DataModel
-from aas_middleware.model.formatting.aas.aas_middleware_util import (
+from semantic_middleware.connect.connectors.connector import Connector
+from semantic_middleware.middleware import middleware
+from semantic_middleware.middleware.registries import ConnectionInfo
+from semantic_middleware.model import data_model
+from semantic_middleware.model.core import Identifiable
+from semantic_middleware.model.data_model import DataModel
+from semantic_middleware.model.formatting.aas.aas_middleware_util import (
     get_contained_models_attribute_info,
 )
 from aas_pydantic.aas_model import Blob, File
-from aas_middleware.model.reference_util import (
+from semantic_middleware.model.reference_util import (
     get_attribute_paths_to_contained_type,
 )
-from aas_middleware.model.util import is_identifiable_type
+from semantic_middleware.model.util import is_identifiable_type
 
 if TYPE_CHECKING:
-    from aas_middleware.middleware.middleware import Middleware
+    from semantic_middleware.middleware.middleware import Middleware
 
 
-def check_if_attribute_is_optional(model: Type[Identifiable], attribute_name: str) -> bool:
+def check_if_attribute_is_optional(
+    model: Type[Identifiable], attribute_name: str
+) -> bool:
     """
     Checks if the attribute of a model is optional.
 
@@ -45,9 +47,7 @@ def check_if_attribute_is_optional(model: Type[Identifiable], attribute_name: st
         ValueError: If the attribute is not present in the model.
     """
     if attribute_name not in model.model_fields:
-        raise ValueError(
-            f"{attribute_name} is not an attribute of {model.__name__}."
-        )
+        raise ValueError(f"{attribute_name} is not an attribute of {model.__name__}.")
     field_info = model.model_fields[attribute_name]
     if not field_info.is_required():
         return True
@@ -59,7 +59,9 @@ def check_if_attribute_is_optional(model: Type[Identifiable], attribute_name: st
         return False
 
 
-def check_if_attribute_is_iterable(model: Type[Identifiable], attribute_name: str) -> bool:
+def check_if_attribute_is_iterable(
+    model: Type[Identifiable], attribute_name: str
+) -> bool:
     """
     Checks if an an attribute is iterable. Sets are not considered iterable, since they do not allow indexing.
     This is important for the CRUD endpoints, since they are generated for lists and tuples.
@@ -74,9 +76,7 @@ def check_if_attribute_is_iterable(model: Type[Identifiable], attribute_name: st
         ValueError: If the attribute is not in the model.
     """
     if attribute_name not in model.model_fields:
-        raise ValueError(
-            f"{attribute_name} is not an attribute of {model.__name__}."
-        )
+        raise ValueError(f"{attribute_name} is not an attribute of {model.__name__}.")
     field_info = model.model_fields[attribute_name]
     if typing.get_origin(field_info.annotation) == Union:
         all_args_are_iterable = False
@@ -182,15 +182,18 @@ class RestRouter:
                 )
 
         if is_optional_contained_model:
+
             @router.post("/")
             async def post_item(
-                item_id: str, item: contained_model # type: ignore
+                item_id: str, item: contained_model  # type: ignore
             ) -> Dict[str, str]:
                 connector = self.get_connector(item_id)
                 try:
                     provided_data: Identifiable = await connector.provide()
                     provided_data_dict = provided_data.model_dump()
-                    top_level_model_instance = top_level_model.model_validate(provided_data_dict)
+                    top_level_model_instance = top_level_model.model_validate(
+                        provided_data_dict
+                    )
                     setattr(top_level_model_instance, attribute_name, item)
                     await connector.consume(top_level_model_instance)
                     return {
@@ -203,7 +206,7 @@ class RestRouter:
                     )
 
         @router.put("/")
-        async def put_item(item_id: str, item: contained_model) -> Dict[str, str]: # type: ignore
+        async def put_item(item_id: str, item: contained_model) -> Dict[str, str]:  # type: ignore
             connector = self.get_connector(item_id)
             try:
                 top_level_model_instance: Identifiable = await connector.provide()
@@ -270,7 +273,7 @@ class RestRouter:
             contained_model_type (Type[Identifiable]): Pydantic model representing the contained model.
             file_path (list[str]): The path to the file attribute of the contained model.
 
-        Returns:    
+        Returns:
             APIRouter: FastAPI router with CRUD endpoints for the given file path that performs Middleware synchronization.
         """
         url_file_path = "/".join(file_path)
@@ -339,7 +342,9 @@ class RestRouter:
                     detail=f"Model with id {item_id} could not be retrieved. Error: {e}",
                 )
 
-    def generate_aas_endpoints_from_model(self, model_type: Type[Identifiable]) -> APIRouter:
+    def generate_aas_endpoints_from_model(
+        self, model_type: Type[Identifiable]
+    ) -> APIRouter:
         """
         Generates CRUD endpoints for a pydantic model representing an Identifiable model.
 
@@ -370,12 +375,14 @@ class RestRouter:
                     connection_info
                 )
                 retrieved_model_instance = await connector.provide()
-                retrieved_model_instance = remove_blob_contents(retrieved_model_instance, blob_paths)
+                retrieved_model_instance = remove_blob_contents(
+                    retrieved_model_instance, blob_paths
+                )
                 model_instance_list.append(retrieved_model_instance)
             return model_instance_list
 
         @router.post(f"/", response_model=Dict[str, str])
-        async def post_item(item: model_type) -> Dict[str, str]: # type: ignore
+        async def post_item(item: model_type) -> Dict[str, str]:  # type: ignore
             try:
                 await self.middleware.persist(
                     data_model_name=self.data_model_name, model=item
@@ -385,7 +392,8 @@ class RestRouter:
                 }
             except ValueError:
                 raise HTTPException(
-                    status_code=400, detail=f"Model with id {item.id} already exists. Try updating it instead."
+                    status_code=400,
+                    detail=f"Model with id {item.id} already exists. Try updating it instead.",
                 )
 
         @router.get("/{item_id}", response_model=model_type)
@@ -404,7 +412,7 @@ class RestRouter:
                 )
 
         @router.put("/{item_id}")
-        async def put_item(item_id: str, item: model_type) -> Dict[str, str]: # type: ignore
+        async def put_item(item_id: str, item: model_type) -> Dict[str, str]:  # type: ignore
             try:
                 consumer = self.get_connector(item_id)
             except KeyError as e:

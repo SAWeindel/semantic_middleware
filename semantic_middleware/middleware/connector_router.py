@@ -2,9 +2,17 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict
-from aas_middleware.connect.connectors.connector import Connector, Consumer, Provider
-from aas_middleware.middleware.registries import ConnectionInfo
-from aas_middleware.middleware.sync.synced_connector import SyncDirection, SyncRole, SyncedConnector
+from semantic_middleware.connect.connectors.connector import (
+    Connector,
+    Consumer,
+    Provider,
+)
+from semantic_middleware.middleware.registries import ConnectionInfo
+from semantic_middleware.middleware.sync.synced_connector import (
+    SyncDirection,
+    SyncRole,
+    SyncedConnector,
+)
 
 
 class ConnectorDescription(BaseModel):
@@ -55,7 +63,7 @@ def generate_synced_connector_endpoint(
     if isinstance(connector, Consumer):
 
         @router.post("/value", response_model=Dict[str, str])
-        async def set_value(value: Optional[model_type] = None): # type: ignore
+        async def set_value(value: Optional[model_type] = None):  # type: ignore
             try:
                 await connector.consume(value)
             except ConnectionError as e:
@@ -108,7 +116,7 @@ def generate_connector_endpoint(
     if isinstance(connector, Consumer):
 
         @router.post("/value", response_model=Dict[str, str])
-        async def set_value(value: model_type): # type: ignore
+        async def set_value(value: model_type):  # type: ignore
             try:
                 await connector.consume(value)
             except ConnectionError as e:

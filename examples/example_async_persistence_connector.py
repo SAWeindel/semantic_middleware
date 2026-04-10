@@ -2,14 +2,17 @@ import asyncio
 import random
 import typing
 
-import aas_middleware
-from aas_middleware.middleware.persistence_factory import PersistenceFactory
+import semantic_middleware
+from semantic_middleware.middleware.persistence_factory import PersistenceFactory
 
-class Temperature(aas_middleware.Submodel):
+
+class Temperature(semantic_middleware.Submodel):
     temperature: float
 
-class Product(aas_middleware.AAS):
+
+class Product(semantic_middleware.AAS):
     temperature_submodel: Temperature
+
 
 example_product = Product(
     id="example_product_id",
@@ -22,10 +25,11 @@ example_product = Product(
     ),
 )
 
-data_model = aas_middleware.DataModel.from_models(example_product)
+data_model = semantic_middleware.DataModel.from_models(example_product)
 
-middleware = aas_middleware.Middleware()
+middleware = semantic_middleware.Middleware()
 middleware.load_data_model("example", data_model, persist_instances=True)
+
 
 class PersistenceConnector:
     def __init__(self, model: Product):
@@ -56,6 +60,7 @@ class PersistenceConnector:
             print("New temperature data:", temperature)
             yield self.model
             await asyncio.sleep(1)
+
 
 persistence_factory = PersistenceFactory(PersistenceConnector)
 
