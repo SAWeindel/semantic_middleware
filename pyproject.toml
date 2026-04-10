@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "aas-middleware"
+name = "semantic-middleware"
 version = "0.2.6"
 description = ""
-authors = ["Sebastian Behrendt <sebastianbehrendt97@gmail.com>"]
+authors = ["Sebastian Behrendt <sebastianbehrendt97@gmail.com>","Etienne Hoffmann <etienne.hoffmann@kit.edu>", "Sören Weindel <soeren.weindel@kit.edu>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
