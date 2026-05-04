@@ -26,6 +26,7 @@ class BlockingWorkflow(Workflow):
         on_startup (bool, optional): If True, the workflow function is executed on startup. Defaults to False.
         on_shutdown (bool, optional): If True, the workflow function is executed on shutdown. Defaults to False.
         pool_size (int, optional): The number of concurrently running workflows. Defaults to 1.
+        name (Optional[str]): The name of the workflow. If not provided, the name of the workflow function is used. Defaults to None.
     """
 
     def __init__(
@@ -34,11 +35,12 @@ class BlockingWorkflow(Workflow):
         interval: Optional[float],
         on_startup: bool = False,
         on_shutdown: bool = False,
+        name: Optional[str] = None,
         capability: Optional[str] = None,
         pool_size: int = 1,
     ):
         super().__init__(
-            workflow_function, interval, on_startup, on_shutdown, capability
+            workflow_function, interval, on_startup, on_shutdown, name, capability
         )
         self.pool_size = pool_size
         self.semaphore = anyio.Semaphore(pool_size)
@@ -52,6 +54,7 @@ class BlockingWorkflow(Workflow):
         on_shutdown: bool,
         interval: Optional[float],
         pool_size: int = 1,
+        name: Optional[str] = None,
         capability: Optional[str] = None,
         **kwargs: Dict[str, Any],
     ):
@@ -62,6 +65,7 @@ class BlockingWorkflow(Workflow):
             on_shutdown=on_shutdown,
             interval=interval,
             pool_size=pool_size,
+            name=name,
             capability=capability,
         )
 

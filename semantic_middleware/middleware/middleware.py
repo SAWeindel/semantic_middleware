@@ -553,6 +553,7 @@ class Middleware:
     def workflow(
         self,
         *args,
+        name: typing.Optional[str] = None,
         capability: typing.Optional[str] = None,
         on_startup: bool = False,
         on_shutdown: bool = False,
@@ -573,6 +574,7 @@ class Middleware:
                     on_shutdown=on_shutdown,
                     interval=interval,
                     pool_size=pool_size,
+                    name=name,
                     capability=capability,
                     **kwargs,
                 )
@@ -584,6 +586,7 @@ class Middleware:
                     on_shutdown=on_shutdown,
                     interval=interval,
                     pool_size=pool_size,
+                    name=name,
                     capability=capability,
                     **kwargs,
                 )
@@ -594,6 +597,7 @@ class Middleware:
                     on_startup=on_startup,
                     on_shutdown=on_shutdown,
                     interval=interval,
+                    name=name,
                     capability=capability,
                     **kwargs,
                 )

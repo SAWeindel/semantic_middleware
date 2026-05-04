@@ -28,6 +28,7 @@ class Workflow:
         interval (Optional[float]): The interval in seconds in which the workflow function is executed
         on_startup (bool, optional): If True, the workflow function is executed on startup. Defaults to False.
         on_shutdown (bool, optional): If True, the workflow function is executed on shutdown. Defaults to False.
+        name (Optional[str]): The name of the workflow. If not provided, the name of the workflow function is used. Defaults to None.
     """
 
     def __init__(
@@ -36,6 +37,7 @@ class Workflow:
         interval: Optional[float],
         on_startup: bool = False,
         on_shutdown: bool = False,
+        name: Optional[str] = None,
         capability: Optional[str] = None,
     ):
         if not isinstance(workflow_function, functools.partial):
@@ -45,6 +47,7 @@ class Workflow:
         self.on_shutdown = on_shutdown
         self.interval = interval
         self.task_groups: Dict[str, TaskGroup] = {}
+        self._name: str = name
         self.capability: str = capability if capability else self.get_name()
 
     @property
@@ -52,6 +55,8 @@ class Workflow:
         return len(self.task_groups) > 0
 
     def get_name(self) -> str:
+        if self._name:
+            return self._name
         if self.workflow_function is None:
             raise ValueError(
                 "No workflow function defined. Use the 'define' method to define a workflow function."
@@ -78,6 +83,7 @@ class Workflow:
         on_startup: bool,
         on_shutdown: bool,
         interval: Optional[float],
+        name: Optional[str] = None,
         capability: Optional[str] = None,
         **kwargs: Dict[str, Any],
     ):
@@ -87,6 +93,7 @@ class Workflow:
             on_startup=on_startup,
             on_shutdown=on_shutdown,
             interval=interval,
+            name=name,
             capability=capability,
         )
 
