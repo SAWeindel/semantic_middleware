@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def get_version() -> str:
     try:
-        return importlib_metadata.version("aas_middleware")
+        return importlib_metadata.version("semantic_middleware")
     except:
         logger.info(
             "Could not find version in package metadata. Trying to read from pyproject.toml"
